@@ -1,6 +1,8 @@
 // The only file most dashboards need to edit. Name the product, the platform resources the pages
 // read, and the questions to show. The client in lib/datum.ts and the components do the rest.
 export const config = {
+  // 'draft' until `datum check <slug>` prints READY and the owner signs the brief; the page says so.
+  status: 'draft' as 'draft' | 'live',
   slug: '{{slug}}',
   title: '{{title}}',
   description: '{{description}}',
