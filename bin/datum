@@ -52,10 +52,14 @@ def check(a):
             if not re.search(rf"product: '{prod}', name: '{name}'", reg): problems.append(f'resource {prod}/{name} is not in the datum-api registry')
     key = os.environ.get('DATUM_API_KEY')
     if key:
-        import json, urllib.request
+        import json, ssl, urllib.request
+        ctx = ssl.create_default_context()
+        try:
+            import certifi; ctx = ssl.create_default_context(cafile=certifi.where())
+        except ImportError: pass
         req = urllib.request.Request((os.environ.get('DATUM_API_URL') or 'https://datum-api-datumlabs1.vercel.app') + '/api/v1/health', headers={'x-api-key': key})
         try:
-            h = json.load(urllib.request.urlopen(req, timeout=30))
+            h = json.load(urllib.request.urlopen(req, timeout=30, context=ctx))
             if not h.get('ok'): problems.append('platform health not ok: ' + '; '.join(h.get('problems', [])[:3]))
         except Exception as e: problems.append(f'health check failed: {e}')
     else: problems.append('DATUM_API_KEY not set: platform freshness not checked')
