@@ -22,6 +22,47 @@ def need(repo):
     if not (p / '.git').exists(): sys.exit(f'{repo} is not cloned at {p} (set DATUM_ROOT or clone it next to datum-kit)')
     return p
 
+BRIEF_SIGNED = re.compile(r"\*\*Status:\*\*\s*signed off by\s+\S", re.I)
+def brief_path(slug): return need('datum-context') / 'briefs' / f'{slug}.md'
+def require_signed_brief(slug):
+    b = brief_path(slug)
+    if not b.exists(): sys.exit(f'no brief for {slug}: run `datum new brief {slug}` and answer it with the owner first')
+    if not BRIEF_SIGNED.search(b.read_text()): sys.exit(f'brief {b} is not signed off (Status must read "signed off by <name> on <date>")')
+
+def new_brief(a):
+    slug = slugify(a.slug); title = a.title or slug.replace('-', ' ').title()
+    b = brief_path(slug)
+    write(b, render('brief.md', dict(slug=slug, title=title, owner=a.owner or 'unassigned', today=dt.date.today().isoformat())))
+    print(f'answer the questions with the owner, capture the ground truth, then change Status to "signed off by <name> on <date>".')
+
+def check(a):
+    """Readiness gate: brief signed, descriptor present, resources exist, platform fresh, reconciliation logged."""
+    slug = slugify(a.slug); problems = []
+    context, api = need('datum-context'), need('datum-api')
+    b = brief_path(slug)
+    if not b.exists(): problems.append('no brief')
+    elif not BRIEF_SIGNED.search(b.read_text()): problems.append('brief not signed off')
+    if not (context / 'products' / f'{slug}.md').exists(): problems.append('no product descriptor in datum-context/products')
+    log = (context / 'evals' / 'divergence-log.md').read_text() if (context / 'evals' / 'divergence-log.md').exists() else ''
+    if f'| {slug} |' not in log: problems.append('no reconciliation row in evals/divergence-log.md')
+    dash = ROOT / slug / 'datum.config.ts'
+    if dash.exists():
+        reg = (api / 'src' / 'lib' / 'registry.ts').read_text()
+        for prod, name in re.findall(r"product:\s*'([a-z0-9_]+)',\s*name:\s*'([a-z0-9_-]+)'", dash.read_text()):
+            if not re.search(rf"product: '{prod}', name: '{name}'", reg): problems.append(f'resource {prod}/{name} is not in the datum-api registry')
+    key = os.environ.get('DATUM_API_KEY')
+    if key:
+        import json, urllib.request
+        req = urllib.request.Request((os.environ.get('DATUM_API_URL') or 'https://datum-api-datumlabs1.vercel.app') + '/api/v1/health', headers={'x-api-key': key})
+        try:
+            h = json.load(urllib.request.urlopen(req, timeout=30))
+            if not h.get('ok'): problems.append('platform health not ok: ' + '; '.join(h.get('problems', [])[:3]))
+        except Exception as e: problems.append(f'health check failed: {e}')
+    else: problems.append('DATUM_API_KEY not set: platform freshness not checked')
+    print(f'{slug}: ' + ('READY' if not problems else 'NOT READY'))
+    for x in problems: print('  -', x)
+    sys.exit(0 if not problems else 1)
+
 def new_product(a):
     slug = slugify(a.slug); schema = slug.replace('-', '_'); title = a.title or slug.replace('-', ' ').title()
     models, context, api = need('datum-models'), need('datum-context'), need('datum-api')
@@ -29,6 +70,7 @@ def new_product(a):
     mig = f'{(nums[-1] + 1 if nums else 1):04d}_{schema}_raw.sql'
     ctx = dict(slug=slug, schema=schema, title=title, adapter=a.adapter, source_id=f'{schema}_{a.adapter}', url=a.url or 'https://example.com/api',
                today=dt.date.today().isoformat(), migration=mig, SCHEMA_UPPER=schema.upper())
+    if not a.no_brief: require_signed_brief(slug)
     print(f'product {slug} ({a.adapter}) -> schema {schema}')
     write(models / 'db' / 'migrations' / mig, render('product/migration.sql', ctx))
     write(models / 'scripts' / f'ingest_{schema}.py', render(f'product/ingest_{a.adapter}.py', ctx))
@@ -59,6 +101,7 @@ next:
 
 def new_dashboard(a):
     slug = slugify(a.slug); title = a.title or slug.replace('-', ' ').title()
+    if not a.no_brief: require_signed_brief(slug)
     dest = ROOT / slug
     if dest.exists() and any(dest.iterdir()): sys.exit(f'{dest} exists and is not empty')
     src = KIT / 'templates' / 'dashboard'
@@ -73,6 +116,8 @@ def _fill(t, ctx):
 
 p = argparse.ArgumentParser(prog='datum'); sub = p.add_subparsers(dest='cmd', required=True)
 n = sub.add_parser('new'); ns = n.add_subparsers(dest='what', required=True)
-pp = ns.add_parser('product'); pp.add_argument('slug'); pp.add_argument('--adapter', choices=['rest', 'graphql', 'defillama'], default='rest'); pp.add_argument('--title'); pp.add_argument('--url'); pp.set_defaults(fn=new_product)
-dd = ns.add_parser('dashboard'); dd.add_argument('slug'); dd.add_argument('--title'); dd.add_argument('--description'); dd.set_defaults(fn=new_dashboard)
+pp = ns.add_parser('product'); pp.add_argument('slug'); pp.add_argument('--adapter', choices=['rest', 'graphql', 'defillama'], default='rest'); pp.add_argument('--title'); pp.add_argument('--url'); pp.add_argument('--no-brief', action='store_true', help='skip the brief gate (prototypes only)'); pp.set_defaults(fn=new_product)
+dd = ns.add_parser('dashboard'); dd.add_argument('slug'); dd.add_argument('--title'); dd.add_argument('--description'); dd.add_argument('--no-brief', action='store_true', help='skip the brief gate (prototypes only)'); dd.set_defaults(fn=new_dashboard)
+bb = ns.add_parser('brief'); bb.add_argument('slug'); bb.add_argument('--title'); bb.add_argument('--owner'); bb.set_defaults(fn=new_brief)
+cc = sub.add_parser('check'); cc.add_argument('slug'); cc.set_defaults(fn=check)
 a = p.parse_args(); a.fn(a)

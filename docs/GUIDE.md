@@ -1,7 +1,19 @@
 # Building data work at Datum
 
-Every product has three parts, in this order: data in the platform, a door, a page. The kit gives you a
-command for the first and the third; the door needs nothing per product.
+Every product goes through five gates, in this order, and the kit enforces the first one:
+
+1. **Brief.** `bin/datum new brief <slug> --owner <name>` opens the research document in datum-context/briefs.
+   It holds the questions to ask the owner, the research on the protocol or category, the sources probed live
+   with a date, the ground truth captured, and what the platform already has. Nothing is scaffolded until the
+   owner changes its Status line to "signed off by <name> on <date>". `new product` and `new dashboard` refuse
+   otherwise (`--no-brief` exists for throwaway prototypes and nothing that will be shared).
+2. **Data.** Existing resources, or a new product via `new product`.
+3. **Door.** Nothing per product; the API and MCP read the registry.
+4. **Page.** `new dashboard`, then the pages.
+5. **Verify.** `bin/datum check <slug>` must print READY: brief signed, descriptor present, every resource the
+   page reads present in the registry, platform health ok, and a reconciliation row in the divergence log.
+   Only then is a page embedded, linked or shared. Until then its config carries `status: 'draft'` and the
+   page says so.
 
 ## 0. One-time setup
 
