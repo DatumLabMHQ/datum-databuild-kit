@@ -1,0 +1,1 @@
+  { product: '{{schema}}', name: 'daily', table: '{{schema}}.fct_{{schema}}_daily', description: '{{title}}: one row per entity per UTC day (value_usd, secondary_usd, rate_pct).', grain: 'entity × day', dayColumn: 'day', timeColumn: null, filters: { day: 'date', entity_id: 'text', chain: 'text' }, order: 'day desc, value_usd desc nulls last' },

@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""datum: scaffold a product in the platform or a dashboard on it. See README.md and docs/GUIDE.md."""
+import argparse, os, re, shutil, sys, datetime as dt
+from pathlib import Path
+
+KIT = Path(__file__).resolve().parent.parent
+ROOT = Path(os.environ.get('DATUM_ROOT', KIT.parent))   # where datum-models, datum-context, datum-api are cloned
+
+def slugify(s):
+    s = re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
+    if not re.fullmatch(r'[a-z][a-z0-9-]{1,40}', s): sys.exit(f'bad slug: {s!r}')
+    return s
+def render(path, ctx):
+    t = (KIT / 'templates' / path).read_text()
+    for k, v in ctx.items(): t = t.replace('{{' + k + '}}', str(v))
+    return t
+def write(path: Path, content: str, force=False):
+    if path.exists() and not force: print(f'  skip (exists) {path}'); return
+    path.parent.mkdir(parents=True, exist_ok=True); path.write_text(content); print(f'  wrote {path}')
+def need(repo):
+    p = ROOT / repo
+    if not (p / '.git').exists(): sys.exit(f'{repo} is not cloned at {p} (set DATUM_ROOT or clone it next to datum-kit)')
+    return p
+
+def new_product(a):
+    slug = slugify(a.slug); schema = slug.replace('-', '_'); title = a.title or slug.replace('-', ' ').title()
+    models, context, api = need('datum-models'), need('datum-context'), need('datum-api')
+    nums = sorted(int(f.name[:4]) for f in (models / 'db' / 'migrations').glob('[0-9]' * 4 + '_*.sql'))
+    mig = f'{(nums[-1] + 1 if nums else 1):04d}_{schema}_raw.sql'
+    ctx = dict(slug=slug, schema=schema, title=title, adapter=a.adapter, source_id=f'{schema}_{a.adapter}', url=a.url or 'https://example.com/api',
+               today=dt.date.today().isoformat(), migration=mig, SCHEMA_UPPER=schema.upper())
+    print(f'product {slug} ({a.adapter}) -> schema {schema}')
+    write(models / 'db' / 'migrations' / mig, render('product/migration.sql', ctx))
+    write(models / 'scripts' / f'ingest_{schema}.py', render(f'product/ingest_{a.adapter}.py', ctx))
+    write(models / 'models' / schema / 'sources.yml', render('product/sources.yml', ctx))
+    write(models / 'models' / schema / 'staging' / f'stg_{schema}__snapshots.sql', render('product/stg_snapshots.sql', ctx))
+    write(models / 'models' / schema / 'marts' / f'fct_{schema}_daily.sql', render('product/fct_daily.sql', ctx))
+    write(models / 'models' / schema / 'schema.yml', render('product/schema.yml', ctx))
+    # dbt_project block, tiering entry, hourly step
+    dp = models / 'dbt_project.yml'; s = dp.read_text()
+    if f'    {schema}:\n' not in s:
+        s = s.replace('    rwa:\n', f'    {schema}:\n      +schema: {schema}\n      staging:\n        +materialized: view\n      marts:\n        +materialized: table\n    rwa:\n', 1); dp.write_text(s); print('  updated dbt_project.yml')
+    tp = models / 'tiering.yml'; t = tp.read_text()
+    if f'{schema}.raw_snapshots' not in t: tp.write_text(t.rstrip('\n') + f'\n  - product: {schema}\n    table: {schema}.raw_snapshots\n    day_column: fetched_at\n'); print('  updated tiering.yml')
+    hp = models / 'bin' / 'hourly.sh'; h = hp.read_text()
+    if f'ingest_{schema}.py' not in h:
+        h = h.replace('\nstep "dbt build"', f'\nstep "{slug}";'.ljust(24) + f'python scripts/ingest_{schema}.py || warn "{title} ingest had failures (see ops.sync_runs)"\n\nstep "dbt build"', 1); hp.write_text(h); print('  updated bin/hourly.sh')
+    write(context / 'products' / f'{slug}.md', render('product/product.md', ctx))
+    rp = api / 'src' / 'lib' / 'registry.ts'; r = rp.read_text()
+    if f"product: '{schema}'" not in r:
+        r = r.replace('];\n\nexport function findResource', render('product/registry.ts', ctx) + '];\n\nexport function findResource', 1); rp.write_text(r); print('  updated datum-api registry')
+    print(f"""
+next:
+  1. edit scripts/ingest_{schema}.py: put the real endpoint and field mapping in fetch_rows()
+  2. edit models/{schema}/staging/stg_{schema}__snapshots.sql if the source's units are not the house units
+  3. DATABASE_URL=... python scripts/migrate.py && python scripts/ingest_{schema}.py && dbt build --target dev --select {schema}
+  4. open a PR on datum-models (CI builds it into a throwaway schema), then datum-context and datum-api
+  done when /api/v1/products lists {schema} and /api/v1/health shows its job""")
+
+def new_dashboard(a):
+    slug = slugify(a.slug); title = a.title or slug.replace('-', ' ').title()
+    dest = ROOT / slug
+    if dest.exists() and any(dest.iterdir()): sys.exit(f'{dest} exists and is not empty')
+    src = KIT / 'templates' / 'dashboard'
+    shutil.copytree(src, dest, ignore=shutil.ignore_patterns('node_modules', '.next', '.vercel'))
+    ctx = dict(slug=slug, title=title, description=a.description or f'{title}, built on the Datum data platform.', today=dt.date.today().isoformat())
+    for p in [dest / 'datum.config.ts', dest / 'package.json', dest / 'README.md']:
+        p.write_text(render(str(p.relative_to(ROOT)).replace(slug, 'dashboard', 1), ctx) if False else _fill(p.read_text(), ctx))
+    print(f'dashboard {slug} -> {dest}\nnext: cd {dest} && npm install && DATUM_API_URL=https://datum-api-datumlabs1.vercel.app DATUM_API_KEY=... npm run dev\n      edit datum.config.ts and app/page.tsx; deploy: vercel link --scope datumlabs1 --project {slug}, add the two env vars, push.')
+def _fill(t, ctx):
+    for k, v in ctx.items(): t = t.replace('{{' + k + '}}', str(v))
+    return t
+
+p = argparse.ArgumentParser(prog='datum'); sub = p.add_subparsers(dest='cmd', required=True)
+n = sub.add_parser('new'); ns = n.add_subparsers(dest='what', required=True)
+pp = ns.add_parser('product'); pp.add_argument('slug'); pp.add_argument('--adapter', choices=['rest', 'graphql', 'defillama'], default='rest'); pp.add_argument('--title'); pp.add_argument('--url'); pp.set_defaults(fn=new_product)
+dd = ns.add_parser('dashboard'); dd.add_argument('slug'); dd.add_argument('--title'); dd.add_argument('--description'); dd.set_defaults(fn=new_dashboard)
+a = p.parse_args(); a.fn(a)

@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: stg_{{schema}}__snapshots
+    description: Every hourly snapshot for {{title}}, in house units.
+  - name: fct_{{schema}}_daily
+    description: One row per entity per UTC day for {{title}}, last snapshot of the day.
+    tests:
+      - dbt_utils.unique_combination_of_columns: {combination_of_columns: [day, entity_id]}
+    columns:
+      - {name: entity_id, tests: [not_null]}
+      - {name: value_usd, tests: [{dbt_utils.accepted_range: {min_value: 0, max_value: 1000000000000, where: "value_usd is not null"}}]}
+      - {name: rate_pct, tests: [{dbt_utils.accepted_range: {min_value: -100, max_value: 10000, where: "rate_pct is not null"}}]}
