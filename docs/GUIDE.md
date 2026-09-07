@@ -5,7 +5,7 @@ command for the first and the third; the door needs nothing per product.
 
 ## 0. One-time setup
 
-Clone the four repositories side by side: `datum-kit`, `datum-models`, `datum-context`, `datum-api`. The kit
+Clone the four repositories side by side: `datum-databuild-kit`, `datum-models`, `datum-context`, `datum-api`. The kit
 finds the others next to it (or set `DATUM_ROOT`). You need Python 3.12, Node 22 and the platform
 credentials in `~/.config/datum/.env` (ask Olusegun for the read-only URL and the API key).
 

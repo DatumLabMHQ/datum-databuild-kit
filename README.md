@@ -1,4 +1,4 @@
-# datum-kit
+# datum-databuild-kit
 
 The standard way to build data work at Datum. Two commands, one repository.
 
