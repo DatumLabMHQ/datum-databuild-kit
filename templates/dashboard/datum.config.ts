@@ -42,16 +42,19 @@ export const config = {
     { href: '/methodology', label: 'Methodology' },
   ],
   // Shown on the methodology page. Keep them honest: what is read, how often, what it excludes.
+  // role: 'headline' is our own count; 'comparison' is stored beside it and never the headline.
   sources: [
-    { name: 'Datum data platform', detail: 'Hourly snapshots of every listed Morpho market on every chain the platform tracks, read through datum-api. Daily grain is the last observation of the UTC day. The overview trend samples our own count weekly.' },
-    { name: 'DefiLlama', detail: 'Stored beside our own count for reconciliation only; never the headline. Its TVL counts collateral, ours counts assets supplied to markets, so the two differ by definition.' },
+    { name: 'Datum data platform', role: 'headline' as 'headline' | 'comparison', cadence: 'hourly snapshots', detail: 'Every listed Morpho market on every chain the platform tracks, read through datum-api. Daily grain is the last observation of the UTC day.' },
+    { name: 'DefiLlama', role: 'comparison' as 'headline' | 'comparison', cadence: 'daily', detail: 'Read for the reconciliation note only. Its TVL counts collateral, ours counts assets supplied to markets, so the two differ by definition.' },
   ],
   definitions: [
-    { term: 'Supplied', text: 'USD value of loan assets supplied to listed markets at the snapshot, valued at the platform price feed.' },
-    { term: 'Borrowed', text: 'USD value of outstanding debt in listed markets.' },
-    { term: 'Utilisation', text: 'Borrowed divided by supplied, per market and in aggregate.' },
-    { term: 'Supply APY', text: 'The rate the protocol reports for suppliers at the snapshot, annualised, in percent. The headline is weighted by supplied value.' },
-    { term: 'Listed', text: 'Markets the protocol lists in its own interface. Unlisted markets exist on chain but include dust and fake-price entries, so they are excluded from every number here.' },
+    { term: 'Supplied', unit: 'USD', text: 'Value of loan assets supplied to listed markets at the snapshot, at the platform price feed.' },
+    { term: 'Borrowed', unit: 'USD', text: 'Value of outstanding debt in listed markets.' },
+    { term: 'Utilisation', unit: '%', text: 'Borrowed divided by supplied, per market and in aggregate. Above 85% withdrawals may queue.' },
+    { term: 'Supply APY', unit: '% a year', text: 'The rate the protocol reports for suppliers at the snapshot. The headline is weighted by supplied value.' },
+    { term: 'Borrow APY', unit: '% a year', text: 'The rate borrowers pay at the snapshot, before fees.' },
+    { term: 'LLTV', unit: '%', text: 'Liquidation loan to value: the debt to collateral ratio at which a position can be liquidated.' },
+    { term: 'Listed', unit: 'flag', text: 'Markets the protocol lists in its own interface. Unlisted markets exist on chain but include dust and fake-price entries, so they are excluded from every number here.' },
   ],
 };
 export type DatumConfig = typeof config;

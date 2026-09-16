@@ -20,7 +20,9 @@ const ROUTES = [
     await expect(p.locator('svg.recharts-surface')).toHaveCount(4);
   } },
   { path: '/methodology', h1: /Where do these numbers come from/i, checks: async (p: Page) => {
-    await expect(p.getByRole('heading', { name: 'Sources' })).toBeVisible();
+    for (const title of ['Sources', 'Freshness and status', 'Definitions', 'Reconciliation']) await expect(p.locator('[data-slot=card-title]', { hasText: title })).toBeVisible();
+    await expect(p.locator('table tbody tr')).toHaveCount(7);
+    await expect(p.locator('[data-slot=item]')).toHaveCount(7);
   } },
   { path: '/kit/charts', h1: /Which chart, when/i, checks: async (p: Page) => {
     await expect(p.locator('svg.recharts-surface')).toHaveCount(8);
