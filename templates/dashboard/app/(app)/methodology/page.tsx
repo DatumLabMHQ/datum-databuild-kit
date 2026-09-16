@@ -2,7 +2,8 @@
 // fresh they are, and how they reconcile. Cards with Item lists and a table, like every other page,
 // so it reads as part of the dashboard rather than a text column beside it.
 import { config } from '@/datum.config';
-import { loadOverview, platformStatus } from '@/lib/data';
+import { loadOverview } from '@/lib/data';
+import { platformStatus } from '@/lib/platform';
 import { pct, usd } from '@/lib/format';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

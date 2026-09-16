@@ -129,7 +129,7 @@ KIT_FILES = [
     'components/market-charts.tsx', 'components/market-detail-layout.tsx', 'components/market-facts.tsx', 'components/methodology-lists.tsx',
     'components/page-breadcrumb.tsx', 'components/page-header.tsx', 'components/section-cards.tsx', 'components/site-footer.tsx',
     'components/site-header.tsx', 'components/status-banner.tsx',
-    'lib/format.ts', 'lib/types.ts', 'lib/datum.ts', 'lib/chains.ts', 'lib/utils.ts', 'hooks/use-mobile.ts',
+    'lib/format.ts', 'lib/types.ts', 'lib/datum.ts', 'lib/platform.ts', 'lib/chains.ts', 'lib/utils.ts', 'hooks/use-mobile.ts',
     'components.json', 'eslint.config.mjs', 'postcss.config.mjs', 'next.config.ts', 'tsconfig.json',
 ]
 KIT_DIRS = ['components/ui', 'components/charts', 'public/brand']
