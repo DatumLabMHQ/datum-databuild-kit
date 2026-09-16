@@ -21,6 +21,10 @@ export const config = {
   resources: {
     // One row per chain, market and UTC day. Latest day by default; `day=` or `since=` for history.
     markets: { product: 'morpho', name: 'markets', filters: { listed: 'true' } as Record<string, string> },
+    // The positions sample (largest suppliers and borrowers per market, twice a day) and its health bands.
+    // When the platform does not serve them yet, the market page hides those two cards.
+    positions: { product: 'morpho', name: 'positions' },
+    health: { product: 'morpho', name: 'health' },
     // DefiLlama's own figure for the same protocol, stored beside ours for the reconciliation note.
     comparison: { product: 'defillama', name: 'tvl', filters: { slug: 'morpho-blue' } as Record<string, string> },
   },

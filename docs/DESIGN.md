@@ -124,6 +124,13 @@ dev:platform` reads the key from `~/.config/datum/.env` and every page renders o
 config stays `draft` until `bin/datum check <slug>` prints READY. Loaders are wrapped in React `cache()`, so
 the layout, the header and the page share one read per request.
 
+The frame (sidebar, header, banner, footer) does not read `loadOverview()`. It reads `lib/platform.ts`, a kit
+file (`platformStatus`, `showKit`), and asks the dashboard's `lib/data.ts` for two things, typed as
+`FrameData` there: `searchItems()` (rows for the cmd+k palette) and `navBadges()` (counts by nav href). A
+dashboard whose data is not market-shaped keeps its own loaders and shapes (the RWA terminal has
+`lib/rwa.ts` and `lib/rwa-types.ts`) and still exports those two from `lib/data.ts`; nothing in the frame
+changes. The kit's own pages (`/kit/charts`) make their own demo rows and read nothing from `lib/data.ts`.
+
 ## 6. Adding what a page needs
 
 - A component: `npx shadcn@latest add <name>` (badge, tabs, tooltip, skeleton, empty, select, dropdown-menu,
@@ -133,16 +140,20 @@ the layout, the header and the page share one read per request.
   `docs/CHARTS.md` holds the rules in one place and `/kit/charts` shows every chart live. A page passes rows
   and a `series` list; values are formatted by `unit` (usd, pct, count). Pass `format` only from a client
   component: a function cannot cross from a server page to a client chart. Put the chart in a Card with a
-  title and a description. `chart-area-interactive.tsx` is the worked example of the full card.
+  title and a description. `chart-area-interactive.tsx` is the worked example of the full card, and it is
+  reusable as is: pass `series`, `unit`, `title` and `description` for any trend with a range select.
+- A number: `lib/format.ts` has `usd` (compact money), `price` (unit prices: oracle, NAV, share price, never
+  compact), `pct`, `count`, `delta`, `address`, `shortDay`. Use them; do not format inline.
 - A page: add a route under `app/(app)/`, add it to `nav` in `datum.config.ts` and an icon in `app-sidebar.tsx`.
 
 ## 7. Kit files versus dashboard files
 
 Kit files, changed here and copied forward, never forked inside a dashboard: `app/globals.css`, the
 layouts, error and loading files, `components/*.tsx`, `components/charts/*`, `components/ui/*`,
-`lib/format.ts`, `lib/types.ts`, `lib/datum.ts`, `lib/chains.ts`, the config files. The full list is `KIT_FILES`
-in `bin/datum`. Dashboard files: `datum.config.ts`, `app/(app)/**/page.tsx`, `lib/data.ts`, `lib/sample.ts`, and
-any table or component the dashboard adds for its own resources.
+`lib/format.ts`, `lib/types.ts`, `lib/datum.ts`, `lib/platform.ts`, `lib/chains.ts`, the config files. The full
+list is `KIT_FILES` in `bin/datum`. Dashboard files: `datum.config.ts`, `app/(app)/**/page.tsx`, `lib/data.ts`,
+`lib/sample.ts`, and any table, loader or component the dashboard adds for its own resources (a dashboard adds
+routes freely; the kit's `loading.tsx` files can be re-exported for them).
 
 `bin/datum sync <slug>` copies the kit files forward into a dashboard and lists what changed (`--dry-run`
 to look first); it never touches the dashboard's own files, and it reports dependency versions to align
