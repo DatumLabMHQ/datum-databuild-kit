@@ -118,10 +118,55 @@ def _fill(t, ctx):
     for k, v in ctx.items(): t = t.replace('{{' + k + '}}', str(v))
     return t
 
+# Kit files: changed in the kit and copied forward into every dashboard (docs/DESIGN.md §7). Everything
+# else in a dashboard is its own. `datum sync <slug>` copies these, reports what changed, never touches
+# the dashboard's own files.
+KIT_FILES = [
+    'app/globals.css', 'app/layout.tsx', 'app/not-found.tsx', 'app/(app)/layout.tsx', 'app/(app)/error.tsx', 'app/(app)/not-found.tsx',
+    'app/(app)/loading.tsx', 'app/(app)/markets/loading.tsx', 'app/(app)/markets/[id]/loading.tsx', 'app/(app)/kit/charts/page.tsx',
+    'components/Providers.tsx', 'components/ThemeToggle.tsx', 'components/app-sidebar.tsx', 'components/asset-avatar.tsx',
+    'components/chart-area-interactive.tsx', 'components/command-menu.tsx', 'components/data-table.tsx', 'components/markets-table.tsx',
+    'components/market-charts.tsx', 'components/market-detail-layout.tsx', 'components/market-facts.tsx', 'components/methodology-lists.tsx',
+    'components/page-breadcrumb.tsx', 'components/page-header.tsx', 'components/section-cards.tsx', 'components/site-footer.tsx',
+    'components/site-header.tsx', 'components/status-banner.tsx',
+    'lib/format.ts', 'lib/types.ts', 'lib/datum.ts', 'lib/chains.ts', 'lib/utils.ts', 'hooks/use-mobile.ts',
+    'components.json', 'eslint.config.mjs', 'postcss.config.mjs', 'next.config.ts', 'tsconfig.json',
+]
+KIT_DIRS = ['components/ui', 'components/charts', 'public/brand']
+
+def sync(a):
+    import filecmp, difflib
+    slug = slugify(a.slug); dest = ROOT / slug; src = KIT / 'templates' / 'dashboard'
+    if not (dest / 'datum.config.ts').exists(): sys.exit(f'{dest} is not a dashboard built with this kit (no datum.config.ts)')
+    files = list(KIT_FILES)
+    for d in KIT_DIRS: files += [str(p.relative_to(src)) for p in (src / d).rglob('*') if p.is_file()]
+    changed, added, same = [], [], 0
+    for rel in files:
+        s, t = src / rel, dest / rel
+        if not s.exists(): continue
+        if t.exists() and filecmp.cmp(s, t, shallow=False): same += 1; continue
+        (added if not t.exists() else changed).append(rel)
+        if not a.dry_run: t.parent.mkdir(parents=True, exist_ok=True); shutil.copy2(s, t)
+    # dependencies: report the kit's versions where the dashboard differs; never rewrite package.json
+    import json
+    kit_pkg = json.loads((src / 'package.json').read_text()); dash_pkg = json.loads((dest / 'package.json').read_text())
+    deps = []
+    for section in ('dependencies', 'devDependencies'):
+        for k, v in kit_pkg.get(section, {}).items():
+            have = dash_pkg.get(section, {}).get(k)
+            if have != v: deps.append(f'{k}: {have or "missing"} -> {v}')
+    verb = 'would update' if a.dry_run else 'updated'
+    print(f'{slug}: {same} kit files unchanged, {len(changed)} {verb}, {len(added)} {"would be added" if a.dry_run else "added"}')
+    for rel in changed: print(f'  ~ {rel}')
+    for rel in added: print(f'  + {rel}')
+    if deps: print('dependencies to align in package.json (npm install <name>@<version>):'); [print(f'  {d}') for d in deps]
+    if not a.dry_run and (changed or added): print(f'next: cd {dest} && npm install && npm run check   (then review the diff and commit)')
+
 p = argparse.ArgumentParser(prog='datum'); sub = p.add_subparsers(dest='cmd', required=True)
 n = sub.add_parser('new'); ns = n.add_subparsers(dest='what', required=True)
 pp = ns.add_parser('product'); pp.add_argument('slug'); pp.add_argument('--adapter', choices=['rest', 'graphql', 'defillama'], default='rest'); pp.add_argument('--title'); pp.add_argument('--url'); pp.add_argument('--no-brief', action='store_true', help='skip the brief gate (prototypes only)'); pp.set_defaults(fn=new_product)
 dd = ns.add_parser('dashboard'); dd.add_argument('slug'); dd.add_argument('--title'); dd.add_argument('--description'); dd.add_argument('--no-brief', action='store_true', help='skip the brief gate (prototypes only)'); dd.set_defaults(fn=new_dashboard)
 bb = ns.add_parser('brief'); bb.add_argument('slug'); bb.add_argument('--title'); bb.add_argument('--owner'); bb.set_defaults(fn=new_brief)
 cc = sub.add_parser('check'); cc.add_argument('slug'); cc.set_defaults(fn=check)
+ss = sub.add_parser('sync', help='copy the kit files forward into a dashboard built with it'); ss.add_argument('slug'); ss.add_argument('--dry-run', action='store_true'); ss.set_defaults(fn=sync)
 a = p.parse_args(); a.fn(a)

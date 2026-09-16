@@ -10,5 +10,11 @@ export const CHAINS: Record<number, { name: string; slug?: string }> = {
   56: { name: 'BNB Chain', slug: 'binance' }, 5000: { name: 'Mantle', slug: 'mantle' }, 59144: { name: 'Linea', slug: 'linea' },
 };
 export const chainName = (id: number | string) => CHAINS[Number(id)]?.name ?? `Chain ${id}`;
-export const chainLogo = (id: number | string) => { const s = CHAINS[Number(id)]?.slug; return s ? `${ICON}/rsz_${s.replace(/ /g, '%20')}.jpg` : undefined; };
-export const protocolLogo = (slug: string) => `https://icons.llamao.fi/icons/protocols/${slug}?w=48&h=48`;
+// Logos shipped with the kit (public/brand/logos) are served locally; others come from DefiLlama's CDN.
+const LOCAL_CHAINS = new Set(['ethereum', 'base', 'arbitrum', 'optimism', 'avalanche', 'polygon', 'unichain']);
+const LOCAL_PROTOCOLS = new Set(['aave', 'morpho-blue', 'compound-finance']);
+export const chainLogo = (id: number | string) => {
+  const s = CHAINS[Number(id)]?.slug; if (!s) return undefined;
+  return LOCAL_CHAINS.has(s) ? `/brand/logos/chain-${s}.webp` : `${ICON}/rsz_${s.replace(/ /g, '%20')}.jpg`;
+};
+export const protocolLogo = (slug: string) => (LOCAL_PROTOCOLS.has(slug) ? `/brand/logos/${slug}.webp` : `https://icons.llamao.fi/icons/protocols/${slug}?w=48&h=48`);

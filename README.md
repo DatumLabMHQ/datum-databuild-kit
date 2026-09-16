@@ -5,6 +5,7 @@ The standard way to build data work at Datum. Two commands, one repository.
 ```bash
 bin/datum new product <slug> --adapter rest|graphql|defillama   # a new product in the platform
 bin/datum new dashboard <slug>                                    # a new dashboard on the platform
+bin/datum sync <slug>                                             # copy the kit files forward into a dashboard
 ```
 
 `new product` writes the whole platform side into your local clones of `datum-models`, `datum-context` and

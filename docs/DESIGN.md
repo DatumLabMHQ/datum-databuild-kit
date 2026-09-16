@@ -138,11 +138,16 @@ the layout, the header and the page share one read per request.
 
 ## 7. Kit files versus dashboard files
 
-Kit files, changed here and copied forward, never forked inside a dashboard: `app/globals.css`,
-`app/(app)/layout.tsx`, `app/(app)/**/loading.tsx`, `components/*.tsx`, `components/charts/*`,
-`components/ui/*`, `lib/format.ts`, `lib/types.ts`, `lib/datum.ts`. Dashboard files: `datum.config.ts`,
-`app/(app)/**/page.tsx`, `lib/data.ts`, `lib/sample.ts`. The chart guide route `app/(app)/kit/charts` may
-be deleted from a dashboard; the rules stay in the kit.
+Kit files, changed here and copied forward, never forked inside a dashboard: `app/globals.css`, the
+layouts, error and loading files, `components/*.tsx`, `components/charts/*`, `components/ui/*`,
+`lib/format.ts`, `lib/types.ts`, `lib/datum.ts`, `lib/chains.ts`, the config files. The full list is `KIT_FILES`
+in `bin/datum`. Dashboard files: `datum.config.ts`, `app/(app)/**/page.tsx`, `lib/data.ts`, `lib/sample.ts`, and
+any table or component the dashboard adds for its own resources.
+
+`bin/datum sync <slug>` copies the kit files forward into a dashboard and lists what changed (`--dry-run`
+to look first); it never touches the dashboard's own files, and it reports dependency versions to align
+rather than rewriting `package.json`. This is how the kit stays one kit across dashboards until the shared
+files are published as a package.
 
 ## 8. Continuous checks
 
