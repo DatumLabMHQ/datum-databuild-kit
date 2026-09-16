@@ -3,13 +3,13 @@
 // Groups: the pages from datum.config.ts and every market by symbol, protocol or chain.
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpenIcon, MagnifyingGlassIcon, SquaresFourIcon, TableIcon } from '@phosphor-icons/react';
+import { BookOpenIcon, MagnifyingGlassIcon, SquaresFourIcon, TableIcon, VaultIcon } from '@phosphor-icons/react';
 import { config } from '@/datum.config';
 import { Button } from '@/components/ui/button';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command';
 
 export type CommandMarket = { id: string; collateral: string; loan: string; protocol: string };
-const ICONS: Record<string, React.ReactNode> = { '/': <SquaresFourIcon />, '/markets': <TableIcon />, '/methodology': <BookOpenIcon /> };
+const ICONS: Record<string, React.ReactNode> = { '/': <SquaresFourIcon />, '/markets': <TableIcon />, '/vaults': <VaultIcon />, '/methodology': <BookOpenIcon /> };
 
 export function CommandMenu({ markets }: { markets: CommandMarket[] }) {
   const [open, setOpen] = React.useState(false);

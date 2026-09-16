@@ -6,14 +6,14 @@ import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowSquareOutIcon, BookOpenIcon, ChartLineUpIcon, SquaresFourIcon, TableIcon } from '@phosphor-icons/react';
+import { ArrowSquareOutIcon, BookOpenIcon, ChartLineUpIcon, SquaresFourIcon, TableIcon, VaultIcon } from '@phosphor-icons/react';
 import { config } from '@/datum.config';
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu,
   SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarRail,
 } from '@/components/ui/sidebar';
 
-const ICONS: Record<string, React.ReactNode> = { '/': <SquaresFourIcon />, '/markets': <TableIcon />, '/methodology': <BookOpenIcon /> };
+const ICONS: Record<string, React.ReactNode> = { '/': <SquaresFourIcon />, '/markets': <TableIcon />, '/vaults': <VaultIcon />, '/methodology': <BookOpenIcon /> };
 const KIT = [{ href: '/kit/charts', label: 'Chart guide', icon: <ChartLineUpIcon /> }];
 
 export function AppSidebar({ marketCount, showKit = false, ...props }: React.ComponentProps<typeof Sidebar> & { marketCount?: number; showKit?: boolean }) {
