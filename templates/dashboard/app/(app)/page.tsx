@@ -1,5 +1,5 @@
-// Overview. Step 2 of the rebuild: the KPI row reads our data. The chart and table are still the
-// stock block content; steps 3 and 4 replace them.
+// Overview. Step 3 of the rebuild: KPI row and the supplied/borrowed chart read our data. The
+// table is still the stock block content; step 4 replaces it.
 import { ChartAreaInteractive } from '@/components/chart-area-interactive';
 import { DataTable } from '@/components/data-table';
 import { SectionCards } from '@/components/section-cards';
@@ -13,7 +13,7 @@ export default async function Overview() {
   return (
     <>
       <SectionCards kpis={d.kpis} asOf={d.asOf} />
-      <div className="px-4 lg:px-6"><ChartAreaInteractive /></div>
+      <div className="px-4 lg:px-6"><ChartAreaInteractive data={d.history} asOf={d.asOf} /></div>
       <DataTable data={data} />
     </>
   );
