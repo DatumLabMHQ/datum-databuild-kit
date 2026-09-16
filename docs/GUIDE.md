@@ -59,8 +59,8 @@ Creates a Next.js 15 app from `templates/dashboard`, the reference dashboard and
 the pages read and how their columns map onto the normalised shapes, nav, sources, definitions) and the pages
 under `app/`. `lib/data.ts` turns resources into the shapes pages read; without `DATUM_API_KEY` it returns
 labelled sample data, so the app runs and looks right before a single query is wired. `lib/datum.ts` is the
-platform client; the key stays server-side. Charts, panels, KPIs and tables are the kit's components; shadcn
-components are added with `npx shadcn@latest add <name>` and arrive already themed.
+platform client; the key stays server-side. The frame, cards, chart and table are shadcn's dashboard-01 block on the Datum tokens; more shadcn
+components and chart types are added with `npx shadcn@latest add <name>` and arrive already themed.
 
 Deploy on the Datum Labs Vercel account:
 

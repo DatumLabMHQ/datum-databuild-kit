@@ -9,7 +9,8 @@ on labelled sample data.
 - `datum.config.ts`: title, the question the overview answers, resources and their column mapping, nav, sources, definitions.
 - `lib/data.ts`: turns resources into the normalised shapes in `lib/types.ts` (or returns `lib/sample.ts`).
 - `lib/datum.ts`: the server-side platform client. `lib/format.ts`: the formatters every number goes through.
-- `app/`: overview, markets, methodology. `components/`: Shell, Panel, Kpi, DataTable, Pill, Charts, ThemeToggle; `components/ui/` is shadcn.
+- `app/(app)/`: the shared frame (shadcn dashboard-01 block) and the pages: overview, markets, methodology.
+- `components/`: app-sidebar, site-header, status-banner, page-header, section-cards, chart-area-interactive, data-table, site-footer, ThemeToggle; `components/ui/` is shadcn.
 - Design rules: `docs/DESIGN.md` in the kit.
 
 ```bash

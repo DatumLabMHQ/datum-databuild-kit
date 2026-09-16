@@ -4,12 +4,14 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ─────────────────────────────────────────────────────────────────────
-   Datum design system. Tokens first: the same names the HTML kit used
-   (--bg, --surface, --fg, --chart-n, --chain-*), then the shadcn/ui
-   variables mapped onto them so every shadcn component and chart wears
-   the Datum look without per-component styling. One aesthetic:
-   institutional. Inter everywhere including numbers (tabular figures),
-   sentence case, colour reserved for data rather than chrome.
+   Datum design system. This file is tokens only. First the Datum names
+   (--bg, --surface, --fg, --chart-n, --chain-*, --brand-blue), then the
+   shadcn/ui variables mapped onto them, so every shadcn component and
+   chart wears the Datum look with no per-component CSS. Layout and
+   components are Tailwind utilities in the .tsx files; there are no
+   custom classes here on purpose. One aesthetic: Inter everywhere
+   including numbers (tabular figures), sentence case, colour for data
+   rather than chrome, light and dark through the tokens.
    ───────────────────────────────────────────────────────────────────── */
 :root {
   --bg: #F6F5F2; --bg-2: #EFEEE9; --surface: #FFFFFF; --surface-2: #FBFAF7;
@@ -99,120 +101,3 @@
 .recharts-cartesian-grid line, .recharts-polar-grid line, .recharts-polar-grid path, .recharts-polar-grid circle, .recharts-polar-grid polygon { stroke: var(--line); }
 .recharts-radial-bar-background-sector { fill: var(--bg-2); }
 .recharts-surface, .recharts-layer, .recharts-sector { outline: none; }
-
-/* ─── Shell ─── */
-@layer components {
-  .shell { min-height: 100dvh; display: flex; flex-direction: column; }
-  .topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 56px; padding: 0 24px; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-  .topbar-left, .topbar-right { display: flex; align-items: center; gap: 14px; min-width: 0; }
-  .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: -0.01em; font-size: 14px; white-space: nowrap; }
-  .brand img { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; }
-  .brand b { font-weight: 600; color: var(--brand-blue); }
-  .brand-sep { width: 1px; height: 18px; background: var(--line-strong); }
-  .topbar-title { font-size: 13px; color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .nav { display: flex; align-items: center; gap: 2px; }
-  .nav a { padding: 6px 10px; border-radius: 8px; font-size: 13px; color: var(--fg-muted); font-weight: 500; }
-  .nav a:hover { background: var(--hover); color: var(--fg); }
-  .nav a.on { background: var(--bg-2); color: var(--fg); }
-  .main { flex: 1; width: 100%; max-width: var(--max); margin: 0 auto; padding: 28px 24px 96px; }
-  .foot { max-width: var(--max); margin: 0 auto; padding: 18px 24px 28px; border-top: 1px solid var(--line); font-size: 12px; color: var(--fg-muted); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
-
-  .theme-toggle { display: inline-flex; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-2); }
-  .theme-toggle button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 22px; border-radius: 6px; color: var(--fg-muted); }
-  .theme-toggle button.active { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
-
-  /* Status pills */
-  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 500; background: var(--bg-2); color: var(--fg-muted); white-space: nowrap; }
-  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .pill.ok { background: var(--green-soft); color: var(--green); }
-  .pill.warn { background: var(--yellow-soft); color: var(--yellow); }
-  .pill.bad { background: var(--red-soft); color: var(--red); }
-  .pill.info { background: color-mix(in srgb, var(--brand-blue) 12%, transparent); color: var(--brand-blue); }
-
-  .banner { max-width: var(--max); margin: 16px auto -8px; padding: 10px 14px; border-radius: 10px; font-size: 13px; border: 1px solid; }
-  .banner.draft { background: var(--yellow-soft); border-color: color-mix(in srgb, var(--yellow) 40%, transparent); color: var(--fg); }
-  .banner.sample { background: color-mix(in srgb, var(--brand-blue) 10%, transparent); border-color: color-mix(in srgb, var(--brand-blue) 35%, transparent); color: var(--fg); }
-  .banner b { font-weight: 600; }
-
-  /* Page header: the question the page answers, then the one-line answer */
-  .page-header { margin: 0 0 22px; }
-  .page-title { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 6px; text-wrap: balance; }
-  .page-subtitle { font-size: 14px; color: var(--fg-muted); max-width: 72ch; margin: 0; }
-
-  /* KPI row */
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--grid-gap); margin: 0 0 var(--grid-gap); }
-  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow-sm); }
-  .kpi .label { font-size: 12px; font-weight: 500; color: var(--fg-muted); }
-  .kpi .value { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; margin-top: 4px; }
-  .kpi .sub { font-size: 12px; color: var(--fg-muted); margin-top: 4px; display: flex; gap: 8px; align-items: center; }
-  .delta { font-weight: 500; }
-  .delta.up { color: var(--green); }
-  .delta.down { color: var(--red); }
-
-  /* Grids */
-  .grid-2, .grid-3, .grid-4 { display: grid; gap: var(--grid-gap); margin: 0 0 var(--grid-gap); }
-  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-
-  /* Panel: header, mandatory caption, body */
-  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); margin: 0 0 var(--grid-gap); min-width: 0; }
-  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px var(--panel-pad) 0; }
-  .panel-title { font-size: 13px; font-weight: 600; margin: 0; display: inline-flex; align-items: center; gap: 8px; }
-  .panel-title .bullet { width: 6px; height: 6px; border-radius: 50%; background: var(--fg-dim); }
-  .panel-badge { font-size: 11.5px; color: var(--fg-dim); white-space: nowrap; }
-  .panel-badge a { color: var(--brand-blue); }
-  .panel-caption { padding: 6px var(--panel-pad) 0; font-size: 12.5px; color: var(--fg-muted); line-height: 1.5; max-width: 80ch; }
-  .panel-caption b { font-weight: 600; color: var(--fg); }
-  .panel-body { padding: 14px var(--panel-pad) var(--panel-pad); min-width: 0; }
-  .panel-body.flush { padding: 12px 0 0; }
-  .panel-note { padding: 0 var(--panel-pad) var(--panel-pad); font-size: 12.5px; color: var(--fg-muted); line-height: 1.55; }
-  .panel-note b { font-weight: 600; color: var(--fg); }
-
-  /* Tables */
-  .table-wrap { overflow-x: auto; }
-  .datatable { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .datatable th, .datatable td { padding: 9px var(--panel-pad); text-align: left; border-top: 1px solid var(--line); white-space: nowrap; vertical-align: middle; }
-  .datatable thead th { border-top: 0; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 500; color: var(--fg-muted); }
-  .datatable th.num, .datatable td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .datatable tbody tr:hover td { background: var(--hover); }
-  .datatable td.dim { color: var(--fg-muted); }
-  .asset { display: inline-flex; align-items: center; gap: 8px; }
-  .asset-icon { width: 22px; height: 22px; border-radius: 6px; display: inline-grid; place-items: center; font-size: 9px; font-weight: 600; color: #fff; }
-  .asset-sub { font-size: 11.5px; color: var(--fg-muted); }
-
-  /* Donut side legend and centre readouts (also used by the radial chart) */
-  .donut { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
-  .donut-legend { display: flex; flex-direction: column; gap: 7px; min-width: 150px; flex: 1; }
-  .donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; transition: opacity .15s; cursor: default; }
-  .donut-legend-item.muted { opacity: 0.45; }
-  .donut-legend-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .donut-legend-value { color: var(--fg-muted); }
-  .swatch { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; display: inline-block; }
-  .chart-center-value { font-size: 20px; font-weight: 600; fill: var(--fg); }
-  .chart-center-label { font-size: 11px; fill: var(--fg-muted); }
-
-  /* Prose pages (methodology) */
-  .prose-page { max-width: 76ch; }
-  .prose-page h2 { font-size: 15px; font-weight: 600; margin: 26px 0 8px; }
-  .prose-page p, .prose-page li { font-size: 14px; color: var(--fg); line-height: 1.6; }
-  .prose-page ul { padding-left: 18px; margin: 6px 0; }
-  .prose-page dt { font-weight: 600; margin-top: 10px; }
-  .prose-page dd { margin: 2px 0 0; color: var(--fg-muted); }
-}
-
-/* ─── Responsive ─── */
-@media (max-width: 1100px) {
-  .grid-4, .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 760px) {
-  .topbar { padding: 0 14px; height: 52px; }
-  .topbar-title, .brand-sep { display: none; }
-  .main { padding: 18px 14px 96px; }
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: minmax(0, 1fr); }
-  .col-hide-sm { display: none; }
-  .datatable th, .datatable td { padding-left: 14px; padding-right: 14px; }
-  .nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; min-width: 0; justify-content: space-around; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); }
-  .nav a { font-size: 12px; padding: 8px 10px; }
-  .foot { padding-bottom: 80px; }
-}
