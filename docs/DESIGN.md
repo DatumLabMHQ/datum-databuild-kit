@@ -66,8 +66,8 @@ A page is a server component. It calls `loadOverview()` and lays out, in this or
 1. `PageHeader`: the question the page answers as the heading, the one-line answer with the as-of date under it.
 2. `SectionCards`: four stat cards (Card, CardDescription, CardTitle, CardAction with an outline Badge and a
    trend icon, CardFooter with a one-line reading and a detail line).
-3. `ChartAreaInteractive`: the area chart in a Card with a range switch (Toggle Group, Select on narrow cards),
-   gradient areas on the chart palette, a USD axis, the indicator tooltip, the caption in the description.
+3. `ChartAreaInteractive`: the area chart in a Card with a native select for the range, gradient areas on the
+   chart palette, a USD axis, the indicator tooltip, the caption in the description.
 4. `DataTable`: the shadcn data-table recipe on TanStack Table v9 inside a Card, like every other panel:
    title and caption in the card header, the text filter and the Columns menu as the card action, the table
    filling the card edge to edge, paging in the card footer. Every row opens the market's page; the market
