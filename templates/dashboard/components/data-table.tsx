@@ -17,6 +17,7 @@ import { ArrowDownIcon, ArrowUpIcon, ArrowsDownUpIcon, CaretDoubleLeftIcon, Care
 import { AssetAvatar, MarketPair } from '@/components/asset-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -92,17 +93,16 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
   });
   const total = table.getFilteredRowModel().rows.length;
   return (
-    <div className="flex w-full flex-col gap-4 px-4 lg:px-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-base font-semibold leading-none">{title}</h2>
-          <p className="mt-1.5 max-w-[80ch] text-sm text-muted-foreground">{caption}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Input placeholder="Filter markets" className="h-8 w-40" value={(table.getColumn('collateral')?.getFilterValue() as string) ?? ''} onChange={(e) => table.getColumn('collateral')?.setFilterValue(e.target.value)} />
+    <div className="px-4 lg:px-6">
+    <Card className="@container/card">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription className="max-w-[80ch]">{caption}</CardDescription>
+        <CardAction className="flex items-center gap-2">
+          <Input placeholder="Filter markets" className="h-8 w-32 @lg/card:w-44" value={(table.getColumn('collateral')?.getFilterValue() as string) ?? ''} onChange={(e) => table.getColumn('collateral')?.setFilterValue(e.target.value)} />
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
-              <ColumnsIcon data-icon="inline-start" />Columns<CaretDownIcon data-icon="inline-end" />
+              <ColumnsIcon data-icon="inline-start" /><span className="hidden @md/card:inline">Columns</span><CaretDownIcon data-icon="inline-end" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               {table.getAllColumns().filter((c) => typeof c.accessorFn !== 'undefined' && c.getCanHide()).map((c) => (
@@ -110,11 +110,12 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-      </div>
-      <div className="overflow-hidden rounded-lg border">
+        </CardAction>
+      </CardHeader>
+      <CardContent className="px-0">
+      <div className="overflow-x-auto border-t">
         <Table>
-          <TableHeader className="sticky top-0 z-10 bg-muted">
+          <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>
                 {hg.headers.map((h) => (
@@ -138,7 +139,8 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between">
+      </CardContent>
+      <CardFooter className="flex items-center justify-between">
         <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">{total} market{total === 1 ? '' : 's'}</div>
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
@@ -156,7 +158,8 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
             <Button variant="outline" className="hidden size-8 lg:flex" size="icon" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}><span className="sr-only">Last page</span><CaretDoubleRightIcon /></Button>
           </div>
         </div>
-      </div>
+      </CardFooter>
+    </Card>
     </div>
   );
 }

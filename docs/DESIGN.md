@@ -68,9 +68,10 @@ A page is a server component. It calls `loadOverview()` and lays out, in this or
    trend icon, CardFooter with a one-line reading and a detail line).
 3. `ChartAreaInteractive`: the area chart in a Card with a range switch (Toggle Group, Select on narrow cards),
    gradient areas on the chart palette, a USD axis, the indicator tooltip, the caption in the description.
-4. `DataTable`: the shadcn data-table recipe on TanStack Table v9: sortable headers, a text filter, the
-   Columns menu, paging. Title and caption above it. Every row opens the market's page; the market cell is a
-   real link for keyboards. Assets, protocols and chains render as Avatars (logo, or initials on a
+4. `DataTable`: the shadcn data-table recipe on TanStack Table v9 inside a Card, like every other panel:
+   title and caption in the card header, the text filter and the Columns menu as the card action, the table
+   filling the card edge to edge, paging in the card footer. Every row opens the market's page; the market
+   cell is a real link for keyboards. Assets, protocols and chains render as Avatars (logo, or initials on a
    chart-palette tile) through `AssetAvatar` and `MarketPair`.
 
 The market page (`app/(app)/markets/[id]`) is the drill-down: a `PageBreadcrumb`, the pair as overlapping
