@@ -1,0 +1,69 @@
+// Every route renders on sample data with no console errors, and the pieces a reader relies on
+// are there. Fails loudly on a broken page, a missing caption, or a server-side render error.
+import { expect, test, type Page } from '@playwright/test';
+
+const ROUTES = [
+  { path: '/', h1: /Where does lending activity sit/i, checks: async (p: Page) => {
+    await expect(p.locator('[data-slot=card]').first()).toBeVisible();
+    await expect(p.locator('svg.recharts-surface').first()).toBeVisible();
+    await expect(p.locator('table tbody tr')).toHaveCount(8);
+    await expect(p.getByText('Sample data').first()).toBeVisible();
+  } },
+  { path: '/markets', h1: /Which markets carry the risk/i, checks: async (p: Page) => {
+    await expect(p.locator('table tbody tr')).toHaveCount(12);
+    await p.getByPlaceholder('Filter markets').fill('usdc');
+    await expect(p.locator('table tbody tr')).toHaveCount(6);
+  } },
+  { path: '/markets/wsteth-usdc', h1: /wstETH \/ USDC/, checks: async (p: Page) => {
+    await expect(p.locator('[data-slot=resizable-handle]')).toBeVisible();
+    await expect(p.locator('[data-slot=item]').first()).toBeVisible();
+    await expect(p.locator('svg.recharts-surface')).toHaveCount(4);
+  } },
+  { path: '/methodology', h1: /Where do these numbers come from/i, checks: async (p: Page) => {
+    await expect(p.getByRole('heading', { name: 'Sources' })).toBeVisible();
+  } },
+  { path: '/kit/charts', h1: /Which chart, when/i, checks: async (p: Page) => {
+    await expect(p.locator('svg.recharts-surface')).toHaveCount(8);
+  } },
+];
+
+for (const r of ROUTES) {
+  test(`${r.path} renders clean`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    page.on('pageerror', (e) => errors.push(e.message));
+    const res = await page.goto(r.path);
+    expect(res?.status(), 'HTTP status').toBe(200);
+    await expect(page.getByRole('heading', { level: 1, name: r.h1 })).toBeVisible();
+    await r.checks(page);
+    // Every chart or table card carries a description (the caption rule).
+    const cards = page.locator('[data-slot=card]:has(svg.recharts-surface), [data-slot=card]:has(table)');
+    for (let i = 0; i < await cards.count(); i++) await expect(cards.nth(i).locator('[data-slot=card-description]').first()).toHaveText(/.{20,}/);
+    expect(errors, 'console errors').toEqual([]);
+  });
+}
+
+test('a wrong market id shows the on-brand not-found page', async ({ page }) => {
+  const res = await page.goto('/markets/does-not-exist');
+  // notFound() inside a route with a loading.tsx streams: the status is already 200 by the time the
+  // boundary renders. The page is what matters; the status is 404 only when nothing streamed first.
+  expect([200, 404]).toContain(res?.status());
+  await expect(page.getByRole('heading', { level: 1, name: /nothing at this address/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Back to the overview/i })).toBeVisible();
+});
+
+test('a table row opens its market and the palette finds it', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('table tbody tr').first().click();
+  await expect(page).toHaveURL(/\/markets\/[a-z0-9-]+$/);
+  await page.keyboard.press('Meta+k');
+  await page.getByPlaceholder('Search pages and markets').fill('weth');
+  await expect(page.locator('[data-slot=command-item]:visible, [cmdk-item]:visible').first()).toBeVisible();
+});
+
+test('phone width: no horizontal scroll on the overview', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const wider = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(wider).toBe(false);
+});

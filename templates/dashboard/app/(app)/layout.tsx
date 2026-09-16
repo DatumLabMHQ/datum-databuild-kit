@@ -5,13 +5,13 @@ import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { StatusBanner } from '@/components/status-banner';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { loadOverview } from '@/lib/data';
+import { loadOverview, platformStatus, showKit } from '@/lib/data';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const o = await loadOverview();
+  const [o, s] = await Promise.all([loadOverview(), platformStatus()]);
   return (
     <SidebarProvider style={{ '--sidebar-width': 'calc(var(--spacing) * 64)', '--header-height': 'calc(var(--spacing) * 12)' } as React.CSSProperties}>
-      <AppSidebar variant="inset" marketCount={o.markets.length} />
+      <AppSidebar variant="inset" marketCount={o.markets.length} showKit={showKit(s)} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">

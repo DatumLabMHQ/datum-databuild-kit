@@ -22,3 +22,6 @@ This is the only dashboard kit. The HTML kit (`DL-Dashboard`) and the `datumlabs
 
 Read `docs/GUIDE.md` before the first one, `docs/DESIGN.md` before the first page and `docs/CHARTS.md` before the first chart. The first dashboard built with the kit is
 `DatumLabMHQ/robinhood-lending`: State of Lending on Robinhood Chain.
+
+CI: `.github/workflows/check.yml` typechecks, lints, builds and smoke-tests the template on every push, and
+generates a dashboard with `bin/datum` to prove the scaffolder still works.

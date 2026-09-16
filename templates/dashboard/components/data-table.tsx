@@ -128,7 +128,7 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.length ? table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="cursor-pointer" onClick={() => router.push(`/markets/${row.original.id}`)}>
+              <TableRow key={row.id} className="cursor-pointer" onClick={(e) => { if ((e.target as HTMLElement).closest('a, button')) return; router.push(`/markets/${row.original.id}`); }}>
                 {row.getAllCells().filter((c) => c.column.getIsVisible()).map((cell) => (
                   <TableCell key={cell.id} className={NUMERIC.has(cell.column.id) ? 'text-right' : ''}><FlexRender cell={cell} /></TableCell>
                 ))}

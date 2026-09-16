@@ -1,7 +1,9 @@
-node_modules
 .next
 .vercel
 __pycache__
+node_modules
+playwright-report
+templates/dashboard/.env*
 templates/dashboard/next-env.d.ts
 templates/dashboard/tsconfig.tsbuildinfo
-templates/dashboard/.env*
+test-results

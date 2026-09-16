@@ -10,6 +10,9 @@ import type { Market, MarketDetail, Overview, Point, Share } from './types';
 
 export type PlatformStatus = { sample: boolean; ok: boolean | null; asOf: string | null };
 
+/** The kit's own pages (chart guide) show in sample mode or when NEXT_PUBLIC_SHOW_KIT=true. */
+export const showKit = (s: PlatformStatus) => s.sample || process.env.NEXT_PUBLIC_SHOW_KIT === 'true';
+
 export const platformStatus = cache(async (): Promise<PlatformStatus> => {
   if (!hasKey()) return { sample: true, ok: null, asOf: SAMPLE_AS_OF };
   try { const h = await health(); return { sample: false, ok: h.ok, asOf: h.last_build ? h.last_build.slice(0, 16).replace('T', ' ') : null }; }

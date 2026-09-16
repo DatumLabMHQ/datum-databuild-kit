@@ -49,8 +49,10 @@ token that has no shadcn name is reached as `text-(--brand-blue)` or `bg-(--gree
 Every page shares `app/(app)/layout.tsx`, which is the `dashboard-01` frame:
 
 - `AppSidebar`: shadcn Sidebar, inset, collapsing to icons (cmd+b, or the rail). Groups with labels:
-  Pages from `datum.config.ts` with the active route lit and a badge with the market count; Kit with the
-  chart guide and datumlab.xyz. The Datum mark and wordmark in the header, the dashboard title in the
+  Pages from `datum.config.ts` with the active route lit and a badge with the market count; a second group
+  with datumlab.xyz, which also carries the chart guide when the kit is shown (sample mode, or
+  `NEXT_PUBLIC_SHOW_KIT=true`). Client dashboards on the platform never show kit internals; `/kit/charts`
+  returns not-found when hidden. The Datum mark and wordmark in the header, the dashboard title in the
   footer. On phones it becomes a sheet behind the toggle.
 - `SiteHeader`: sidebar toggle, title, the ⌘K search (`CommandMenu`: pages and every market by symbol,
   protocol or chain), a status badge (sample data, platform healthy, degraded, unreachable) and the theme
@@ -138,7 +140,15 @@ Kit files, changed here and copied forward, never forked inside a dashboard: `ap
 `app/(app)/**/page.tsx`, `lib/data.ts`, `lib/sample.ts`. The chart guide route `app/(app)/kit/charts` may
 be deleted from a dashboard; the rules stay in the kit.
 
-## 8. Checklist before a page is shared
+## 8. Continuous checks
+
+Every push to the kit runs `.github/workflows/check.yml`: `npm run check` on the template (typecheck, lint,
+build), the Playwright smoke test in `tests/smoke.spec.ts` against the built app on sample data (every route
+renders with no console errors, captions present, the not-found page, a row click, the palette, phone
+width), and a scaffolder job that generates a dashboard with `bin/datum` and typechecks it. Run the smoke
+test locally with `npm run test:smoke` at the kit root against a dev server on 3030.
+
+## 9. Checklist before a page is shared
 
 - [ ] The page opens with the question and the one-line answer, dated.
 - [ ] Every chart and table has a caption; every number goes through a formatter; missing values read n/a.

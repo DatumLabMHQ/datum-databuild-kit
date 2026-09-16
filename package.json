@@ -1,0 +1,12 @@
+{
+  "name": "datum-databuild-kit",
+  "private": true,
+  "description": "The standard way to build data work at Datum. Root package holds the smoke test that CI runs against the template.",
+  "scripts": {
+    "test:smoke": "playwright test",
+    "check": "cd templates/dashboard && npm run check"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0"
+  }
+}

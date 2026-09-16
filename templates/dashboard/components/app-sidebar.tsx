@@ -1,6 +1,7 @@
 'use client';
 // The left pane: shadcn Sidebar, inset variant, collapsing to icons (cmd+b). Navigation is data:
-// pages come from datum.config.ts, the kit's own pages live in KIT. Icons are Phosphor only.
+// pages come from datum.config.ts; the kit's own pages (KIT) show only in sample mode or with
+// NEXT_PUBLIC_SHOW_KIT=true, so client dashboards never show kit internals. Icons are Phosphor only.
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -15,7 +16,7 @@ import {
 const ICONS: Record<string, React.ReactNode> = { '/': <SquaresFourIcon />, '/markets': <TableIcon />, '/methodology': <BookOpenIcon /> };
 const KIT = [{ href: '/kit/charts', label: 'Chart guide', icon: <ChartLineUpIcon /> }];
 
-export function AppSidebar({ marketCount, ...props }: React.ComponentProps<typeof Sidebar> & { marketCount?: number }) {
+export function AppSidebar({ marketCount, showKit = false, ...props }: React.ComponentProps<typeof Sidebar> & { marketCount?: number; showKit?: boolean }) {
   const path = usePathname();
   const active = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(href + '/'));
   return (
@@ -47,14 +48,14 @@ export function AppSidebar({ marketCount, ...props }: React.ComponentProps<typeo
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Kit</SidebarGroupLabel>
+          <SidebarGroupLabel>{showKit ? 'Kit' : 'Datum'}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {KIT.map((n) => (
+              {showKit ? KIT.map((n) => (
                 <SidebarMenuItem key={n.href}>
                   <SidebarMenuButton tooltip={n.label} isActive={active(n.href)} render={<Link href={n.href} />}>{n.icon}<span>{n.label}</span></SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )) : null}
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="datumlab.xyz" render={<a href="https://www.datumlab.xyz" target="_blank" rel="noreferrer" />}><ArrowSquareOutIcon /><span>datumlab.xyz</span></SidebarMenuButton>
               </SidebarMenuItem>

@@ -26,7 +26,7 @@ export function CommandMenu({ markets }: { markets: CommandMarket[] }) {
         <MagnifyingGlassIcon /><span className="hidden md:inline">Search markets</span>
         <kbd className="pointer-events-none ml-1 hidden rounded border bg-muted px-1.5 font-mono text-[10px] font-medium md:inline-block">⌘K</kbd>
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen} title="Search" description="Jump to a page or a market">
+      {open ? <CommandDialog open={open} onOpenChange={setOpen} title="Search" description="Jump to a page or a market">
         <Command>
           <CommandInput placeholder="Search pages and markets" />
           <CommandList>
@@ -46,7 +46,7 @@ export function CommandMenu({ markets }: { markets: CommandMarket[] }) {
             </CommandGroup>
           </CommandList>
         </Command>
-      </CommandDialog>
+      </CommandDialog> : null}
     </>
   );
 }

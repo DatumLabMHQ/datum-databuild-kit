@@ -4,7 +4,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/page-header';
 import { AreaChart, BarChart, DonutChart, LineChart, RadarChart, RadialChart } from '@/components/charts';
-import { loadOverview } from '@/lib/data';
+import { notFound } from 'next/navigation';
+import { loadOverview, platformStatus, showKit } from '@/lib/data';
 
 export const metadata = { title: 'Chart guide' };
 
@@ -21,6 +22,7 @@ function Guide({ title, use, not, children }: { title: string; use: string; not:
 }
 
 export default async function ChartGuide() {
+  if (!showKit(await platformStatus())) notFound();
   const d = await loadOverview();
   const radar = ['Liquidity', 'Utilisation', 'Oracle', 'Governance', 'Collateral', 'Track record'].map((axis, i) => ({ axis, Aave: [92, 71, 88, 80, 76, 95][i], Morpho: [74, 83, 70, 62, 88, 64][i] }));
   const byProtocolByMonth = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'].map((name, i) => ({ name, Aave: 2.4e9 + i * 1.2e8, Morpho: 1.6e9 + i * 1.5e8, Compound: 0.7e9 + i * 2e7 }));

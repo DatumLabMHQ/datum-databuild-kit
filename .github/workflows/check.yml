@@ -1,0 +1,46 @@
+name: check
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  template:
+    name: template typecheck, lint, build, smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: templates/dashboard/package-lock.json }
+      - name: Install the template
+        working-directory: templates/dashboard
+        run: npm ci
+      - name: Typecheck, lint, build
+        working-directory: templates/dashboard
+        run: npm run check
+      - name: Install the smoke test
+        run: npm install --no-audit --no-fund && npx playwright install --with-deps chromium
+      - name: Smoke test on sample data
+        run: npm run test:smoke
+        env: { CI: 'true' }
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-traces, path: test-results, retention-days: 7 }
+  scaffolder:
+    name: bin/datum generates a dashboard that typechecks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Generate a dashboard from the template
+        run: |
+          mkdir -p /tmp/datum-root
+          DATUM_ROOT=/tmp/datum-root python3 bin/datum new dashboard ci-dashboard --title "CI dashboard" --no-brief
+          grep -q '"name": "ci-dashboard"' /tmp/datum-root/ci-dashboard/package.json
+          ! grep -rn "{{slug}}\|{{title}}\|{{description}}" /tmp/datum-root/ci-dashboard/package.json /tmp/datum-root/ci-dashboard/README.md
+      - name: Install and typecheck the generated dashboard
+        working-directory: /tmp/datum-root/ci-dashboard
+        run: npm ci && npm run typecheck && npm run lint
