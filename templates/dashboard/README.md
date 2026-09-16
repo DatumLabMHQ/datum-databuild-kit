@@ -9,9 +9,9 @@ on labelled sample data.
 - `datum.config.ts`: title, the question the overview answers, resources and their column mapping, nav, sources, definitions.
 - `lib/data.ts`: turns resources into the normalised shapes in `lib/types.ts` (or returns `lib/sample.ts`).
 - `lib/datum.ts`: the server-side platform client. `lib/format.ts`: the formatters every number goes through.
-- `app/(app)/`: the shared frame (shadcn dashboard-01 block) and the pages: overview, markets, methodology.
-- `components/`: app-sidebar, site-header, status-banner, page-header, section-cards, chart-area-interactive, data-table, site-footer, ThemeToggle; `components/ui/` is shadcn.
-- Design rules: `docs/DESIGN.md` in the kit.
+- `app/(app)/`: the shared frame (shadcn dashboard-01 block), the pages (overview, markets, one market, methodology, the chart guide) and a loading skeleton per route.
+- `components/`: app-sidebar, site-header, command-menu, status-banner, page-header, page-breadcrumb, section-cards, chart-area-interactive, data-table, asset-avatar, market-charts, market-facts, market-detail-layout, site-footer, ThemeToggle; `components/charts/` is the chart library; `components/ui/` is shadcn on Phosphor icons.
+- Design rules: `docs/DESIGN.md` in the kit; chart rules: `docs/CHARTS.md`.
 
 ```bash
 npm install && npm run dev            # sample data

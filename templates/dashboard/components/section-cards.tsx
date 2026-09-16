@@ -1,6 +1,6 @@
 // The KPI row: shadcn's section-cards recipe, fed by our normalised data instead of hardcoded
 // numbers. No "use client": nothing here has state, so it renders on the server with the data.
-import { TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
+import { TrendDownIcon, TrendUpIcon } from '@phosphor-icons/react/ssr';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { count, delta, pct, usd } from '@/lib/format';
@@ -9,7 +9,7 @@ import type { Overview } from '@/lib/types';
 type Stat = { label: string; value: string; change?: number; headline: string; detail: string };
 
 function Trend({ change }: { change: number }) {
-  const Icon = change >= 0 ? TrendingUpIcon : TrendingDownIcon;
+  const Icon = change >= 0 ? TrendUpIcon : TrendDownIcon;
   return <Badge variant="outline"><Icon />{delta(change)}</Badge>;
 }
 
@@ -36,7 +36,7 @@ export function SectionCards({ kpis, asOf }: { kpis: Overview['kpis']; asOf: str
           <CardFooter className="flex-col items-start gap-1.5 text-sm">
             <div className="line-clamp-1 flex gap-2 font-medium">
               {s.headline}
-              {s.change !== undefined ? (s.change >= 0 ? <TrendingUpIcon className="size-4" /> : <TrendingDownIcon className="size-4" />) : null}
+              {s.change !== undefined ? (s.change >= 0 ? <TrendUpIcon className="size-4" /> : <TrendDownIcon className="size-4" />) : null}
             </div>
             <div className="text-muted-foreground">{s.detail}</div>
           </CardFooter>

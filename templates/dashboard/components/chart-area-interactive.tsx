@@ -1,14 +1,13 @@
 'use client';
-// Supplied and borrowed over time: shadcn's chart-area-interactive recipe (card, range switch,
-// gradient areas, indicator tooltip) fed by our normalised history rows. Needs "use client":
-// the range switch is state.
+// Supplied and borrowed over time: shadcn's chart-area-interactive recipe (card, a native select
+// for the range, gradient areas, indicator tooltip) fed by our normalised history rows. Needs
+// "use client": the range is state.
 import * as React from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { shortDay, usd } from '@/lib/format';
 import type { Point } from '@/lib/types';
 
@@ -29,7 +28,6 @@ export function ChartAreaInteractive({ data, asOf }: { data: Point[]; asOf: stri
   const days = RANGES.find((r) => r.value === timeRange)?.days ?? 90;
   const start = new Date(last); start.setUTCDate(last.getUTCDate() - days);
   const rows = data.filter((p) => new Date(String(p.day) + 'T00:00:00Z') >= start);
-  const label = RANGES.find((r) => r.value === timeRange)?.label ?? 'Last 3 months';
 
   return (
     <Card className="@container/card">
@@ -40,18 +38,9 @@ export function ChartAreaInteractive({ data, asOf }: { data: Point[]; asOf: stri
           <span className="@[540px]/card:hidden">Daily, as of {asOf}</span>
         </CardDescription>
         <CardAction>
-          <ToggleGroup multiple={false} value={timeRange ? [timeRange] : []} onValueChange={(value) => setTimeRange(value[0] ?? '90d')} variant="outline"
-            className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex">
-            {RANGES.map((r) => <ToggleGroupItem key={r.value} value={r.value}>{r.label}</ToggleGroupItem>)}
-          </ToggleGroup>
-          <Select value={timeRange} onValueChange={(value) => { if (value !== null) setTimeRange(value); }}>
-            <SelectTrigger className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden" size="sm" aria-label="Time range">
-              <SelectValue placeholder={label} />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              {RANGES.map((r) => <SelectItem key={r.value} value={r.value} className="rounded-lg">{r.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <NativeSelect size="sm" aria-label="Time range" value={timeRange} onChange={(e) => setTimeRange(e.target.value)}>
+            {RANGES.map((r) => <NativeSelectOption key={r.value} value={r.value}>{r.label}</NativeSelectOption>)}
+          </NativeSelect>
         </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">

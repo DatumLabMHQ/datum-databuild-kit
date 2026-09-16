@@ -1,37 +1,71 @@
 'use client';
+// The left pane: shadcn Sidebar, inset variant, collapsing to icons (cmd+b). Navigation is data:
+// pages come from datum.config.ts, the kit's own pages live in KIT. Icons are Phosphor only.
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BookOpenIcon, ExternalLinkIcon, LayoutDashboardIcon, TableIcon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { ArrowSquareOutIcon, BookOpenIcon, ChartLineUpIcon, SquaresFourIcon, TableIcon } from '@phosphor-icons/react';
 import { config } from '@/datum.config';
-import { NavMain } from '@/components/nav-main';
-import { NavSecondary } from '@/components/nav-secondary';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu,
+  SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarRail,
+} from '@/components/ui/sidebar';
 
-// Navigation is data. Pages come from datum.config.ts; icons are matched here by route.
-const ICONS: Record<string, React.ReactNode> = { '/': <LayoutDashboardIcon />, '/markets': <TableIcon />, '/methodology': <BookOpenIcon /> };
+const ICONS: Record<string, React.ReactNode> = { '/': <SquaresFourIcon />, '/markets': <TableIcon />, '/methodology': <BookOpenIcon /> };
+const KIT = [{ href: '/kit/charts', label: 'Chart guide', icon: <ChartLineUpIcon /> }];
 
-export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
-  const items = config.nav.map((n) => ({ title: n.label, url: n.href, icon: ICONS[n.href] ?? <LayoutDashboardIcon /> }));
+export function AppSidebar({ marketCount, ...props }: React.ComponentProps<typeof Sidebar> & { marketCount?: number }) {
+  const path = usePathname();
+  const active = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(href + '/'));
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="data-[slot=sidebar-menu-button]:p-1.5!" render={<Link href="/" />}>
-              <Image src="/brand/datum-mark.png" alt="" width={20} height={20} className="size-5 rounded-[5px]" priority />
+            <SidebarMenuButton size="lg" className="data-[slot=sidebar-menu-button]:p-1.5!" render={<Link href="/" />}>
+              <Image src="/brand/datum-mark.png" alt="" width={24} height={24} className="size-6 shrink-0 rounded-[6px]" priority />
               <span className="text-base font-semibold">datum<span className="text-(--brand-blue)">labs</span></span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={items} />
-        <NavSecondary className="mt-auto" items={[{ title: 'datumlab.xyz', url: 'https://www.datumlab.xyz', icon: <ExternalLinkIcon /> }]} />
+        <SidebarGroup>
+          <SidebarGroupLabel>Pages</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {config.nav.map((n) => (
+                <SidebarMenuItem key={n.href}>
+                  <SidebarMenuButton tooltip={n.label} isActive={active(n.href)} render={<Link href={n.href} />}>
+                    {ICONS[n.href] ?? <SquaresFourIcon />}<span>{n.label}</span>
+                  </SidebarMenuButton>
+                  {n.href === '/markets' && marketCount ? <SidebarMenuBadge>{marketCount}</SidebarMenuBadge> : null}
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Kit</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {KIT.map((n) => (
+                <SidebarMenuItem key={n.href}>
+                  <SidebarMenuButton tooltip={n.label} isActive={active(n.href)} render={<Link href={n.href} />}>{n.icon}<span>{n.label}</span></SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="datumlab.xyz" render={<a href="https://www.datumlab.xyz" target="_blank" rel="noreferrer" />}><ArrowSquareOutIcon /><span>datumlab.xyz</span></SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <div className="px-2 py-1 text-xs text-muted-foreground">{config.title}</div>
+        <div className="truncate px-2 py-1 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">{config.title}</div>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }

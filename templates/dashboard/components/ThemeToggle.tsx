@@ -1,17 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Moon, Sun } from 'lucide-react';
+import { MoonIcon, SunIcon } from '@phosphor-icons/react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  const t = mounted ? theme : 'light';
+  const t = mounted ? (theme ?? 'light') : 'light';
   return (
-    <div className="theme-toggle" role="tablist" aria-label="Theme">
-      <button className={t === 'light' ? 'active' : ''} onClick={() => setTheme('light')} title="Light" aria-label="Light theme"><Sun size={13} /></button>
-      <button className={t === 'dark' ? 'active' : ''} onClick={() => setTheme('dark')} title="Dark" aria-label="Dark theme"><Moon size={13} /></button>
-    </div>
+    <ToggleGroup multiple={false} value={[t]} onValueChange={(v) => { if (v[0]) setTheme(v[0]); }} variant="outline" size="sm" aria-label="Theme">
+      <ToggleGroupItem value="light" aria-label="Light theme"><SunIcon /></ToggleGroupItem>
+      <ToggleGroupItem value="dark" aria-label="Dark theme"><MoonIcon /></ToggleGroupItem>
+    </ToggleGroup>
   );
 }

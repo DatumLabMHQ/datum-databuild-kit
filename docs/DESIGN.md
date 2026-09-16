@@ -20,6 +20,11 @@ Inter everywhere including numbers (tabular figures), sentence case, colour rese
 chrome, light and dark through the tokens. Rounded cards on a warm off-white ground; the sidebar is inset.
 This is the only aesthetic.
 
+Icons are **Phosphor only** (`@phosphor-icons/react`, regular weight). `components.json` sets
+`iconLibrary: phosphor`, so `npx shadcn add` writes Phosphor imports into every component. Client
+components import from `@phosphor-icons/react`; server components import the same names from
+`@phosphor-icons/react/ssr`. Never add lucide, tabler or another icon set.
+
 ## 2. Tokens (`app/globals.css`)
 
 The stylesheet is tokens only. Never hardcode a colour, font, radius or spacing. First the Datum names, then
@@ -43,13 +48,18 @@ token that has no shadcn name is reached as `text-(--brand-blue)` or `bg-(--gree
 
 Every page shares `app/(app)/layout.tsx`, which is the `dashboard-01` frame:
 
-- `AppSidebar`: the Datum mark and wordmark, the pages from `datum.config.ts` with the active route lit,
-  a link to datumlab.xyz, the dashboard title in the footer. Collapses off-canvas on phones.
-- `SiteHeader`: sidebar toggle, title, a status badge (sample data, platform healthy, degraded, unreachable)
-  and the theme toggle.
+- `AppSidebar`: shadcn Sidebar, inset, collapsing to icons (cmd+b, or the rail). Groups with labels:
+  Pages from `datum.config.ts` with the active route lit and a badge with the market count; Kit with the
+  chart guide and datumlab.xyz. The Datum mark and wordmark in the header, the dashboard title in the
+  footer. On phones it becomes a sheet behind the toggle.
+- `SiteHeader`: sidebar toggle, title, the ⌘K search (`CommandMenu`: pages and every market by symbol,
+  protocol or chain), a status badge (sample data, platform healthy, degraded, unreachable) and the theme
+  toggle.
 - `StatusBanner`: a shadcn Alert while the numbers cannot be trusted: sample data (no key) or draft (brief
   not signed off). Renders nothing once the config says live.
 - The page's own content, then `SiteFooter` with the provenance sentence and the as-of date.
+- While a page's data loads, Next streams its `loading.tsx`: shadcn Skeletons in the same shape as the
+  page (header lines, cards, chart, table rows). Every route has one.
 
 A page is a server component. It calls `loadOverview()` and lays out, in this order:
 
@@ -59,7 +69,15 @@ A page is a server component. It calls `loadOverview()` and lays out, in this or
 3. `ChartAreaInteractive`: the area chart in a Card with a range switch (Toggle Group, Select on narrow cards),
    gradient areas on the chart palette, a USD axis, the indicator tooltip, the caption in the description.
 4. `DataTable`: the shadcn data-table recipe on TanStack Table v9: sortable headers, a text filter, the
-   Columns menu, paging. Title and caption above it.
+   Columns menu, paging. Title and caption above it. Every row opens the market's page; the market cell is a
+   real link for keyboards. Assets, protocols and chains render as Avatars (logo, or initials on a
+   chart-palette tile) through `AssetAvatar` and `MarketPair`.
+
+The market page (`app/(app)/markets/[id]`) is the drill-down: a `PageBreadcrumb`, the pair as overlapping
+Avatars, the risk badge and a one-line reading, then a `MarketDetailLayout`: on wide screens two Resizable
+panels with a draggable handle (charts left; utilisation ring, parameters, collateral by health band and
+largest suppliers right), stacked on phones. Parameters and suppliers are shadcn `Item` lists with a
+Phosphor icon, a title, a description and the value. A range control is a `NativeSelect`.
 
 Sections stack with `gap-4 md:gap-6`; content sits in `px-4 lg:px-6`. Grids use container queries
 (`@xl/main:grid-cols-2 @5xl/main:grid-cols-4`), so they respond to the content width, not the window.
@@ -87,23 +105,28 @@ page. `status` in the config stays `draft` until `bin/datum check <slug>` prints
 
 - A component: `npx shadcn@latest add <name>` (badge, tabs, tooltip, skeleton, empty, select, dropdown-menu,
   command...). It lands in `components/ui/` already themed. Do not add a second component library.
-- A chart type: `npx shadcn@latest add chart-pie-donut-text` (or any example name from ui.shadcn.com/charts:
-  `chart-bar-horizontal`, `chart-line-multiple`, `chart-radar-default`, `chart-radial-text`). Put it in a
-  Card, feed it rows from `lib/data.ts`, colour series with `var(--chart-n)`, format values with
-  `lib/format.ts`, write the caption. `chart-area-interactive.tsx` is the worked example of that.
+- A chart: use the kit's library in `components/charts` (`AreaChart`, `LineChart`, `BarChart`, `DonutChart`,
+  `RadarChart`, `RadialChart`), each a shadcn chart recipe with its when-to-use rule at the top of the file.
+  `docs/CHARTS.md` holds the rules in one place and `/kit/charts` shows every chart live. A page passes rows
+  and a `series` list; values are formatted by `unit` (usd, pct, count). Pass `format` only from a client
+  component: a function cannot cross from a server page to a client chart. Put the chart in a Card with a
+  title and a description. `chart-area-interactive.tsx` is the worked example of the full card.
 - A page: add a route under `app/(app)/`, add it to `nav` in `datum.config.ts` and an icon in `app-sidebar.tsx`.
 
 ## 7. Kit files versus dashboard files
 
 Kit files, changed here and copied forward, never forked inside a dashboard: `app/globals.css`,
-`app/(app)/layout.tsx`, `components/*.tsx`, `components/ui/*`, `lib/format.ts`, `lib/types.ts`,
-`lib/datum.ts`. Dashboard files: `datum.config.ts`, `app/(app)/**/page.tsx`, `lib/data.ts`, `lib/sample.ts`.
+`app/(app)/layout.tsx`, `app/(app)/**/loading.tsx`, `components/*.tsx`, `components/charts/*`,
+`components/ui/*`, `lib/format.ts`, `lib/types.ts`, `lib/datum.ts`. Dashboard files: `datum.config.ts`,
+`app/(app)/**/page.tsx`, `lib/data.ts`, `lib/sample.ts`. The chart guide route `app/(app)/kit/charts` may
+be deleted from a dashboard; the rules stay in the kit.
 
 ## 8. Checklist before a page is shared
 
 - [ ] The page opens with the question and the one-line answer, dated.
 - [ ] Every chart and table has a caption; every number goes through a formatter; missing values read n/a.
-- [ ] No custom CSS classes, no hardcoded colours; only tokens and Tailwind utilities.
+- [ ] No custom CSS classes, no hardcoded colours; only tokens and Tailwind utilities. Phosphor icons only.
+- [ ] Each chart is the right one for the data (docs/CHARTS.md); every route has a loading skeleton.
 - [ ] Checked in light, dark and at phone width; no horizontal scroll.
 - [ ] `npm run typecheck` and `npm run build` pass.
 - [ ] `bin/datum check <slug>` prints READY and `status` is `live`; the banner is gone.

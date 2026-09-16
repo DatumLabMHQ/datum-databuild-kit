@@ -2,9 +2,9 @@
 // otherwise from lib/sample.ts, labelled as sample on every page.
 import { config } from '@/datum.config';
 import { hasKey, health, query } from './datum';
-import { sampleOverview, SAMPLE_AS_OF } from './sample';
+import { sampleOverview, sampleMarket, SAMPLE_AS_OF } from './sample';
 import { num } from './format';
-import type { Market, Overview, Point, Share } from './types';
+import type { Market, MarketDetail, Overview, Point, Share } from './types';
 
 export type PlatformStatus = { sample: boolean; ok: boolean | null; asOf: string | null };
 
@@ -63,4 +63,23 @@ export async function loadOverview(): Promise<Overview> {
     },
     history, rates, byChain: sumBy(markets, 'chain'), byProtocol: sumBy(markets, 'protocol'), markets, reconciliation: null,
   };
+}
+
+/** One market for the detail page. On the platform: the market's own history rows; facts and
+ *  holders come from the resources named in datum.config.ts when they exist, else stay empty. */
+export async function loadMarket(id: string): Promise<MarketDetail | null> {
+  if (!hasKey()) return sampleMarket(id);
+  const o = await loadOverview();
+  const market = o.markets.find((m) => m.id === id);
+  if (!market) return null;
+  const h = config.resources.history;
+  const hist = await query(h.product, h.name, { ...config.filters, ...h.params, [F.id]: id, limit: 10000 });
+  const rows = hist.rows.map((r) => ({ day: String(r[F.day] ?? '').slice(0, 10), supplied: num(r[F.supplied]), borrowed: num(r[F.borrowed]), sa: num(r[F.supply_apy]), ba: num(r[F.borrow_apy]) })).filter((r) => r.day).sort((a, b) => a.day.localeCompare(b.day));
+  const history: Point[] = rows.map((r) => ({ day: r.day, supply: r.supplied, borrow: r.borrowed }));
+  const rates: Point[] = rows.map((r) => ({ day: r.day, supply_apy: r.sa, borrow_apy: r.ba, utilization: r.supplied ? (r.borrowed / r.supplied) * 100 : 0 }));
+  const facts = [
+    { label: 'Liquidation LTV', value: `${market.lltv}%`, note: 'Loan to value at which a position can be liquidated' },
+    { label: 'Market address', value: market.address ?? 'n/a' },
+  ];
+  return { asOf: o.asOf, sample: false, market, history, rates, facts, suppliers: [], healthBands: [] };
 }

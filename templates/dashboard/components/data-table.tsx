@@ -1,7 +1,8 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // The markets table: shadcn's data-table recipe (TanStack Table v9 with sorting, filtering, column
-// visibility and paging in the shadcn Table) fed by our normalised Market rows. Row selection,
+// visibility and paging in the shadcn Table) fed by our normalised Market rows. Every row opens
+// the market's page: the row is clickable and the market cell is a real link for keyboards. Row selection,
 // drag-to-reorder, tabs and the row drawer from the stock block are gone: a read-only dashboard
 // does not need them.
 import * as React from 'react';
@@ -10,7 +11,10 @@ import {
   createSortedRowModel, FlexRender, rowPaginationFeature, rowSortingFeature, tableFeatures, useTable,
   type Column, type ColumnFiltersState, type ColumnVisibilityState, type FilterFn, type SortingState,
 } from '@tanstack/react-table';
-import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, Columns3Icon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowDownIcon, ArrowUpIcon, ArrowsDownUpIcon, CaretDoubleLeftIcon, CaretDoubleRightIcon, CaretDownIcon, CaretLeftIcon, CaretRightIcon, ColumnsIcon } from '@phosphor-icons/react';
+import { AssetAvatar, MarketPair } from '@/components/asset-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -43,7 +47,7 @@ const RISK_CLASS: Record<Market['risk'], string> = { safe: 'text-(--green)', mod
 // A sortable header: a ghost button that cycles the sort and shows its direction.
 function SortHeader<TValue>({ column, label }: { column: Column<typeof features, Market, TValue>; label: string }) {
   const dir = column.getIsSorted();
-  const Icon = dir === 'asc' ? ArrowUpIcon : dir === 'desc' ? ArrowDownIcon : ArrowUpDownIcon;
+  const Icon = dir === 'asc' ? ArrowUpIcon : dir === 'desc' ? ArrowDownIcon : ArrowsDownUpIcon;
   return (
     <Button variant="ghost" size="sm" className="-mr-3 h-8 px-2 data-[state=open]:bg-accent" onClick={column.getToggleSortingHandler()}>
       {label}<Icon className={dir ? 'text-foreground' : 'text-muted-foreground'} />
@@ -55,14 +59,14 @@ const columns = col.columns([
   col.accessor('collateral', {
     header: 'Market', enableHiding: false, filterFn: 'marketSearch',
     cell: ({ row }) => (
-      <div className="flex items-center gap-2.5">
-        <span className="grid size-6 shrink-0 place-items-center rounded-md text-[9px] font-semibold text-white" style={{ background: `var(--chart-${(row.index % 8) + 1})` }}>{row.original.collateral.slice(0, 2).toUpperCase()}</span>
-        <div className="leading-tight"><div className="font-medium">{row.original.collateral}</div><div className="text-xs text-muted-foreground">{row.original.loan} loan</div></div>
-      </div>
+      <Link href={`/markets/${row.original.id}`} className="flex items-center gap-2.5 outline-none focus-visible:underline">
+        <MarketPair collateral={row.original.collateral} loan={row.original.loan} logos={row.original.logos} />
+        <span className="leading-tight"><span className="block font-medium">{row.original.collateral}</span><span className="block text-xs text-muted-foreground">{row.original.loan} loan</span></span>
+      </Link>
     ),
   }),
-  col.accessor('protocol', { header: 'Protocol', cell: ({ row }) => <Badge variant="outline" className="px-1.5 text-muted-foreground">{row.original.protocol}</Badge> }),
-  col.accessor('chain', { header: 'Chain', cell: ({ row }) => <span className="text-muted-foreground">{row.original.chain}</span> }),
+  col.accessor('protocol', { header: 'Protocol', cell: ({ row }) => <span className="inline-flex items-center gap-1.5 text-muted-foreground"><AssetAvatar symbol={row.original.protocol} src={row.original.logos?.protocol} className="size-4" />{row.original.protocol}</span> }),
+  col.accessor('chain', { header: 'Chain', cell: ({ row }) => <span className="inline-flex items-center gap-1.5 text-muted-foreground"><AssetAvatar symbol={row.original.chain} src={row.original.logos?.chain} className="size-4" />{row.original.chain}</span> }),
   col.accessor('supplied', { header: ({ column }) => <SortHeader column={column} label="Supplied" />, cell: ({ row }) => <span className="tabular-nums">{usd(row.original.supplied)}</span> }),
   col.accessor('borrowed', { header: ({ column }) => <SortHeader column={column} label="Borrowed" />, cell: ({ row }) => <span className="tabular-nums">{usd(row.original.borrowed)}</span> }),
   col.accessor('utilization', {
@@ -79,6 +83,7 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([{ id: 'supplied', desc: true }]);
   const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize });
+  const router = useRouter();
   const table = useTable({
     features, data, columns,
     state: { sorting, columnVisibility, columnFilters, pagination },
@@ -97,7 +102,7 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
           <Input placeholder="Filter markets" className="h-8 w-40" value={(table.getColumn('collateral')?.getFilterValue() as string) ?? ''} onChange={(e) => table.getColumn('collateral')?.setFilterValue(e.target.value)} />
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
-              <Columns3Icon data-icon="inline-start" />Columns<ChevronDownIcon data-icon="inline-end" />
+              <ColumnsIcon data-icon="inline-start" />Columns<CaretDownIcon data-icon="inline-end" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               {table.getAllColumns().filter((c) => typeof c.accessorFn !== 'undefined' && c.getCanHide()).map((c) => (
@@ -122,7 +127,7 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.length ? table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow key={row.id} className="cursor-pointer" onClick={() => router.push(`/markets/${row.original.id}`)}>
                 {row.getAllCells().filter((c) => c.column.getIsVisible()).map((cell) => (
                   <TableCell key={cell.id} className={NUMERIC.has(cell.column.id) ? 'text-right' : ''}><FlexRender cell={cell} /></TableCell>
                 ))}
@@ -145,10 +150,10 @@ export function DataTable({ data, title, caption, pageSize = 10 }: { data: Marke
           </div>
           <div className="flex w-fit items-center justify-center text-sm font-medium">Page {table.state.pagination.pageIndex + 1} of {Math.max(1, table.getPageCount())}</div>
           <div className="ml-auto flex items-center gap-2 lg:ml-0">
-            <Button variant="outline" className="hidden size-8 lg:flex" size="icon" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}><span className="sr-only">First page</span><ChevronsLeftIcon /></Button>
-            <Button variant="outline" className="size-8" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}><span className="sr-only">Previous page</span><ChevronLeftIcon /></Button>
-            <Button variant="outline" className="size-8" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}><span className="sr-only">Next page</span><ChevronRightIcon /></Button>
-            <Button variant="outline" className="hidden size-8 lg:flex" size="icon" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}><span className="sr-only">Last page</span><ChevronsRightIcon /></Button>
+            <Button variant="outline" className="hidden size-8 lg:flex" size="icon" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}><span className="sr-only">First page</span><CaretDoubleLeftIcon /></Button>
+            <Button variant="outline" className="size-8" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}><span className="sr-only">Previous page</span><CaretLeftIcon /></Button>
+            <Button variant="outline" className="size-8" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}><span className="sr-only">Next page</span><CaretRightIcon /></Button>
+            <Button variant="outline" className="hidden size-8 lg:flex" size="icon" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}><span className="sr-only">Last page</span><CaretDoubleRightIcon /></Button>
           </div>
         </div>
       </div>
