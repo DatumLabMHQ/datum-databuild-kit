@@ -12,7 +12,7 @@ export type Market = {
 export type Overview = {
   asOf: string; sample: boolean;
   kpis: { supplied: number; borrowed: number; suppliedChange7d: number; borrowedChange7d: number; markets: number; utilization: number; supplyApy: number };
-  history: Point[]; rates: Point[]; byChain: Share[]; byProtocol: Share[]; markets: Market[];
+  history: Point[]; historyGrain: 'daily' | 'weekly'; rates: Point[]; byChain: Share[]; byProtocol: Share[]; markets: Market[];
   reconciliation: { ours: number; theirs: number; theirsSource: string; note: string } | null;
 };
 // One market, for the detail page.

@@ -18,7 +18,7 @@ const chartConfig = {
 
 const RANGES = [{ value: '90d', label: 'Last 3 months', days: 90 }, { value: '30d', label: 'Last 30 days', days: 30 }, { value: '7d', label: 'Last 7 days', days: 7 }];
 
-export function ChartAreaInteractive({ data, asOf }: { data: Point[]; asOf: string }) {
+export function ChartAreaInteractive({ data, asOf, grain = 'daily' }: { data: Point[]; asOf: string; grain?: 'daily' | 'weekly' }) {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState('90d');
   React.useEffect(() => { if (isMobile) setTimeRange('30d'); }, [isMobile]);
@@ -34,8 +34,8 @@ export function ChartAreaInteractive({ data, asOf }: { data: Point[]; asOf: stri
       <CardHeader>
         <CardTitle>Supplied and borrowed</CardTitle>
         <CardDescription>
-          <span className="hidden @[540px]/card:block">Supplied is the ceiling, borrowed is the demand; the gap between them is the idle liquidity that sets rates. Daily, as of {asOf}.</span>
-          <span className="@[540px]/card:hidden">Daily, as of {asOf}</span>
+          <span className="hidden @[540px]/card:block">Supplied is the ceiling, borrowed is the demand; the gap between them is the idle liquidity that sets rates. Our own count, {grain} points, as of {asOf}.</span>
+          <span className="@[540px]/card:hidden">{grain === 'weekly' ? 'Weekly' : 'Daily'}, as of {asOf}</span>
         </CardDescription>
         <CardAction>
           <NativeSelect size="sm" aria-label="Time range" value={timeRange} onChange={(e) => setTimeRange(e.target.value)}>

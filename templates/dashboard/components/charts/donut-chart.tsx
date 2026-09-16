@@ -46,10 +46,13 @@ export function DonutChart({ items, unit = 'usd', height = 220, centerLabel = 't
         </R.PieChart>
       </ChartContainer>
       {legend ? (
-        <ul className="flex min-w-36 flex-1 flex-col gap-1.5 text-sm">
+        <ul className="flex min-w-36 flex-1 flex-col gap-1 text-sm">
           {data.map((d, i) => (
-            <li key={d.name} className={`flex items-center gap-2 transition-opacity ${hover !== null && hover !== i ? 'opacity-40' : ''}`} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
-              <span className="size-2 shrink-0 rounded-[2px]" style={{ background: d.fill }} /><span className="flex-1 truncate">{d.name}</span><span className="tabular-nums text-muted-foreground">{f(d.value)}</span>
+            <li key={d.name}>
+              <button type="button" className={`flex w-full items-center gap-2 rounded-md px-1 py-0.5 text-left outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-ring/50 ${hover !== null && hover !== i ? 'opacity-40' : ''}`}
+                onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} aria-label={`${d.name}, ${f(d.value)}`}>
+                <span className="size-2 shrink-0 rounded-[2px]" style={{ background: d.fill }} /><span className="flex-1 truncate">{d.name}</span><span className="tabular-nums text-muted-foreground">{f(d.value)}</span>
+              </button>
             </li>))}
         </ul>
       ) : null}

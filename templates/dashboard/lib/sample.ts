@@ -1,17 +1,16 @@
 // Sample data. Used when DATUM_API_KEY is not set, so the template runs as the reference
 // dashboard out of the box. Deterministic (seeded), clearly labelled on the page, never shipped
 // as a live number. Shapes match what lib/data.ts returns from the platform.
+import { chainLogo, chainName, protocolLogo } from './chains';
 import type { Market, Point, Share, Overview, MarketDetail, Holder } from './types';
 
 function rng(seed: number) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
 export const SAMPLE_AS_OF = '2026-09-15';
 const PROTOCOLS = ['Aave', 'Morpho', 'Compound'];
-const PROTOCOL_SLUG: Record<string, string> = { Aave: 'aave', Morpho: 'morpho', Compound: 'compound-finance' };
-const CHAINS = ['Ethereum', 'Base', 'Arbitrum', 'Optimism', 'Avalanche'];
-const ICON = 'https://icons.llamao.fi/icons';
-export const protocolLogo = (p: string) => `${ICON}/protocols/${PROTOCOL_SLUG[p] ?? p.toLowerCase()}?w=48&h=48`;
-export const chainLogo = (c: string) => `${ICON}/chains/rsz_${c.toLowerCase()}.jpg`;
+const PROTOCOL_SLUG: Record<string, string> = { Aave: 'aave', Morpho: 'morpho-blue', Compound: 'compound-finance' };
+const CHAIN_IDS = [1, 8453, 42161, 10, 43114];
+const CHAINS = CHAIN_IDS.map(chainName);
 const ASSETS: [string, string][] = [['wstETH', 'USDC'], ['WETH', 'USDC'], ['WBTC', 'USDC'], ['cbBTC', 'USDT'], ['weETH', 'WETH'], ['USDe', 'USDC'], ['sUSDe', 'DAI'], ['rETH', 'WETH'], ['LINK', 'USDC'], ['ezETH', 'WETH'], ['PT-sUSDe', 'USDC'], ['tBTC', 'WBTC']];
 
 function daysBack(n: number, asOf: string): string[] {
@@ -36,7 +35,7 @@ export function sampleOverview(): Overview {
     const s = Math.round((1.4e9 / (i + 1.3)) * (0.8 + r() * 0.4)); const u = 0.55 + r() * 0.35;
     const protocol = PROTOCOLS[i % 3], chain = CHAINS[i % 5];
     return { id: `${collateral}-${loan}`.toLowerCase(), protocol, chain, collateral, loan, supplied: s, borrowed: Math.round(s * u), utilization: +(u * 100).toFixed(1), supply_apy: +(2.4 + u * 2.5 + r()).toFixed(2), borrow_apy: +(4 + u * 4 + r()).toFixed(2), lltv: [86, 86, 86, 91.5, 94.5, 77, 86, 94.5, 77, 91.5, 91.5, 94.5][i], risk: (u > 0.85 ? 'high' : u > 0.7 ? 'moderate' : 'safe') as Market['risk'],
-      address: '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[Math.floor(r() * 16)]).join(''), logos: { protocol: protocolLogo(protocol), chain: chainLogo(chain) } };
+      address: '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[Math.floor(r() * 16)]).join(''), logos: { protocol: protocolLogo(PROTOCOL_SLUG[protocol]), chain: chainLogo(CHAIN_IDS[i % 5]) } };
   }).sort((a, b) => b.supplied - a.supplied);
   const last = history[history.length - 1], prev = history[history.length - 8];
   return {
@@ -48,7 +47,7 @@ export function sampleOverview(): Overview {
       markets: markets.length, utilization: ((last.borrow as number) / (last.supply as number)) * 100,
       supplyApy: rates[rates.length - 1].supply_apy as number,
     },
-    history, rates, byChain, byProtocol, markets,
+    history, historyGrain: 'daily', rates, byChain, byProtocol, markets,
     reconciliation: { ours: last.supply as number, theirs: Math.round((last.supply as number) * 1.04), theirsSource: 'DefiLlama', note: 'The gap is unlisted markets and idle vault balances, both stored and neither in the headline.' },
   };
 }

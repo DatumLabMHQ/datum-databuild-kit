@@ -17,7 +17,7 @@ export const pickFormat = (unit: Unit, format?: (v: unknown) => string) => forma
 /** A tooltip row in shadcn's layout with a formatted value. Pass as ChartTooltipContent's formatter. */
 export function tooltipRows(config: ChartConfig, f: (v: unknown) => string, totalKeys?: string[]) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (value: any, name: any, item: any, index: number, payload: any) => {
+  return function TooltipRows(value: any, name: any, item: any, index: number, payload: any) {
     const last = totalKeys && index === totalKeys.length - 1;
     const sum = last ? totalKeys.reduce((a, k) => a + (Number(payload?.[k]) || 0), 0) : 0;
     const color = item?.payload?.fill ?? item?.color ?? config[String(name)]?.color;

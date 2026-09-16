@@ -98,9 +98,25 @@ Sections stack with `gap-4 md:gap-6`; content sits in `px-4 lg:px-6`. Grids use 
 ## 5. Data and status
 
 `lib/data.ts` turns platform resources into the normalised shapes in `lib/types.ts` (Market, Point, Share,
-Overview); pages never read raw column names. The mapping lives in `datum.config.ts` (`resources`, `fields`,
-`fractions`). Without `DATUM_API_KEY` the loader returns `lib/sample.ts`, deterministic and labelled on every
-page. `status` in the config stays `draft` until `bin/datum check <slug>` prints READY.
+Overview, MarketDetail); pages never read raw column names. The mapping lives in `datum.config.ts`:
+
+- `resources.markets`: the product/name pair and the filters it is read with (`listed=true`). A resource's
+  filters are the columns datum-api declares for it in `/api/v1/products`; anything else is ignored, and
+  `since`, `until`, `day` and `limit` (max 5000) are the only other parameters.
+- `fields`: the resource's column for each normalised field, and `fractions`: which of those columns hold
+  fractions (Morpho stores `lltv` as 0.86 but `utilization` as 89.4).
+- `trend`: how far back the overview trend goes and how often it samples our own count. The daily table
+  holds one row per market, so a 90-day history is not one call; the loader makes one call per sampled day
+  (weekly by default, daily for the last two weeks while the data is young) and says which grain it used in
+  the chart caption.
+- `resources.comparison`: DefiLlama's figure for the same protocol, read for the reconciliation note under
+  the table. Our own count stays the headline.
+
+The platform path is verified against `morpho/markets` (628 listed markets on 2026-09-14): `npm run
+dev:platform` reads the key from `~/.config/datum/.env` and every page renders on live rows. Without
+`DATUM_API_KEY` the loader returns `lib/sample.ts`, deterministic and labelled on every page. `status` in the
+config stays `draft` until `bin/datum check <slug>` prints READY. Loaders are wrapped in React `cache()`, so
+the layout, the header and the page share one read per request.
 
 ## 6. Adding what a page needs
 
@@ -129,5 +145,5 @@ be deleted from a dashboard; the rules stay in the kit.
 - [ ] No custom CSS classes, no hardcoded colours; only tokens and Tailwind utilities. Phosphor icons only.
 - [ ] Each chart is the right one for the data (docs/CHARTS.md); every route has a loading skeleton.
 - [ ] Checked in light, dark and at phone width; no horizontal scroll.
-- [ ] `npm run typecheck` and `npm run build` pass.
+- [ ] `npm run check` passes (typecheck, lint, build).
 - [ ] `bin/datum check <slug>` prints READY and `status` is `live`; the banner is gone.

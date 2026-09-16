@@ -15,8 +15,8 @@ on labelled sample data.
 
 ```bash
 npm install && npm run dev            # sample data
-DATUM_API_KEY=... npm run dev          # the platform
-npm run typecheck && npm run build     # before a PR
+npm run dev:platform                   # the platform, key read from ~/.config/datum/.env
+npm run check                          # typecheck, lint and build, before a PR
 ```
 
 Deploy: `vercel link --scope datumlabs1 --project {{slug}}`, add `DATUM_API_URL` and `DATUM_API_KEY`, push to main.
