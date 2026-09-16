@@ -55,7 +55,7 @@ the UTC day; our own count is the headline and DefiLlama is stored beside it; di
 ## 3. A page: `bin/datum new dashboard <slug>`
 
 Creates a Next.js 15 app from `templates/dashboard`, the reference dashboard and the one design standard
-(see `docs/DESIGN.md`). You edit `datum.config.ts` (title, the question the overview answers, the resources
+(see `docs/DESIGN.md`; live at https://datum-reference-lake.vercel.app). You edit `datum.config.ts` (title, the question the overview answers, the resources
 the pages read and how their columns map onto the normalised shapes, nav, sources, definitions) and the pages
 under `app/`. `lib/data.ts` turns resources into the shapes pages read; without `DATUM_API_KEY` it returns
 labelled sample data, so the app runs and looks right before a single query is wired. `lib/datum.ts` is the
