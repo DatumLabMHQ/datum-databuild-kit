@@ -20,7 +20,7 @@ datum-api (key stays server-side), and three pages that run on labelled sample d
 This is the only dashboard kit. The HTML kit (`DL-Dashboard`) and the `datumlabs-sdk` monorepo were archived on
 16 September 2026; pages still on the HTML kit migrate here when next touched.
 
-The reference dashboard is live on sample data at https://datum-reference-lake.vercel.app (Datum Labs Vercel account, project `datum-reference`).
+The reference dashboard is live on sample data at https://datum-reference-lake.vercel.app (Datum Labs Vercel account, project `datum-reference`, redeployed on every push to `main`).
 Read `docs/GUIDE.md` before the first one, `docs/DESIGN.md` before the first page and `docs/CHARTS.md` before the first chart. The first dashboard built with the kit is
 `DatumLabMHQ/robinhood-lending`: State of Lending on Robinhood Chain.
 

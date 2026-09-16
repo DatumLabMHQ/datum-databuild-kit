@@ -9,9 +9,9 @@ labelled sample data:
 cd templates/dashboard && npm install && npm run dev
 ```
 
-The same build is live at https://datum-reference-lake.vercel.app, deployed from `templates/dashboard` to the Datum Labs Vercel
-account as project `datum-reference`, on sample data and with no platform key. Redeploy with
-`vercel deploy --prod` from that folder after a change to the kit.
+The same build is live at https://datum-reference-lake.vercel.app: the Datum Labs Vercel project `datum-reference`
+is connected to this repository with root directory `templates/dashboard`, so every push to `main` redeploys it.
+It runs on sample data with no platform key.
 
 The rule that produced it: build from shadcn, never beside it. The page frame is shadcn's `dashboard-01`
 block; the cards, chart and table are that block's recipes fed with our data; everything Datum-specific is
