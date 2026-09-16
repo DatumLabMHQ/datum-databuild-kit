@@ -1,24 +1,38 @@
+import Image from 'next/image';
 import { config } from '@/datum.config';
-import { health } from '@/lib/datum';
+import { platformStatus } from '@/lib/data';
 import { Nav } from './Nav';
+import { ThemeToggle } from './ThemeToggle';
+import { Pill } from './Pill';
 
 export async function Shell({ children }: { children: React.ReactNode }) {
-  let h: { ok: boolean; last_build: string | null } | null = null;
-  try { h = await health(); } catch { h = null; }
+  const s = await platformStatus();
   return (
     <div className="shell">
       <header className="topbar">
-        <div>
-          <div className="brand">{config.title}<small>Datum Labs</small></div>
-          <Nav />
+        <div className="topbar-left">
+          <a className="brand" href="https://www.datumlab.xyz" target="_blank" rel="noreferrer">
+            <Image src="/brand/datum-mark.png" alt="" width={22} height={22} priority />
+            <span>datum<b>labs</b></span>
+          </a>
+          <span className="brand-sep" />
+          <span className="topbar-title">{config.title}</span>
         </div>
-        <div className="meta">
-          {h ? <>platform build {h.last_build ? new Date(h.last_build).toUTCString().slice(5, 22) : '—'} UTC · <span className={`pill ${h.ok ? '' : 'warn'}`}>{h.ok ? 'healthy' : 'degraded'}</span></> : <span className="pill bad">platform unreachable</span>}
+        <Nav />
+        <div className="topbar-right">
+          {s.sample ? <Pill tone="info" dot>sample data</Pill>
+            : s.ok === null ? <Pill tone="bad" dot>platform unreachable</Pill>
+            : <Pill tone={s.ok ? 'ok' : 'warn'} dot>{s.ok ? 'platform healthy' : 'platform degraded'}{s.asOf ? ` · ${s.asOf}` : ''}</Pill>}
+          <ThemeToggle />
         </div>
       </header>
-      {(config as { status?: string }).status === 'draft' ? <div className="draft-banner">Draft. Numbers are live from the platform but the brief is not signed off and the reconciliation is not logged; do not embed or share yet.</div> : null}
-      {children}
-      <footer className="foot">Every number on this page comes from the Datum data platform's curated tables, read through datum-api. Definitions live in datum-context; disagreements with other sources are logged, not hidden.</footer>
+      {s.sample ? <div className="banner sample"><b>Sample data.</b> No platform key is set, so every number on this page is generated and labelled as such. Set DATUM_API_KEY to read the Datum data platform.</div> : null}
+      {config.status === 'draft' && !s.sample ? <div className="banner draft"><b>Draft.</b> Numbers are live from the platform but the brief is not signed off and the reconciliation is not logged. Do not embed or share yet.</div> : null}
+      <main className="main">{children}</main>
+      <footer className="foot">
+        <span>Every number on this page comes from the Datum data platform&rsquo;s curated tables, read through datum-api. Definitions live in datum-context; disagreements with other sources are logged, not hidden.</span>
+        <span>{s.sample ? 'Sample data' : `As of ${s.asOf ?? 'n/a'} UTC`} · Datum Labs</span>
+      </footer>
     </div>
   );
 }

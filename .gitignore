@@ -2,3 +2,7 @@ node_modules
 .next
 .vercel
 __pycache__
+templates/dashboard/package-lock.json
+templates/dashboard/next-env.d.ts
+templates/dashboard/tsconfig.tsbuildinfo
+templates/dashboard/.env*

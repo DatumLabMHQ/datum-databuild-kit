@@ -54,9 +54,13 @@ the UTC day; our own count is the headline and DefiLlama is stored beside it; di
 
 ## 3. A page: `bin/datum new dashboard <slug>`
 
-Creates a Next.js app from `templates/dashboard`. You edit `datum.config.ts` (product, resources, questions,
-default filters, nav) and the pages under `app/`. `lib/datum.ts` is the client: `query(product, resource,
-params)`, `ask(question_id)`, `health()`, plus `usd`, `pct`, `day` formatters. The API key stays server-side.
+Creates a Next.js 15 app from `templates/dashboard`, the reference dashboard and the one design standard
+(see `docs/DESIGN.md`). You edit `datum.config.ts` (title, the question the overview answers, the resources
+the pages read and how their columns map onto the normalised shapes, nav, sources, definitions) and the pages
+under `app/`. `lib/data.ts` turns resources into the shapes pages read; without `DATUM_API_KEY` it returns
+labelled sample data, so the app runs and looks right before a single query is wired. `lib/datum.ts` is the
+platform client; the key stays server-side. Charts, panels, KPIs and tables are the kit's components; shadcn
+components are added with `npx shadcn@latest add <name>` and arrive already themed.
 
 Deploy on the Datum Labs Vercel account:
 

@@ -109,11 +109,11 @@ def new_dashboard(a):
     dest = ROOT / slug
     if dest.exists() and any(dest.iterdir()): sys.exit(f'{dest} exists and is not empty')
     src = KIT / 'templates' / 'dashboard'
-    shutil.copytree(src, dest, ignore=shutil.ignore_patterns('node_modules', '.next', '.vercel'))
+    shutil.copytree(src, dest, ignore=shutil.ignore_patterns('node_modules', '.next', '.vercel', 'package-lock.json', 'next-env.d.ts', 'tsconfig.tsbuildinfo', '.env*'))
     ctx = dict(slug=slug, title=title, description=a.description or f'{title}, built on the Datum data platform.', today=dt.date.today().isoformat())
     for p in [dest / 'datum.config.ts', dest / 'package.json', dest / 'README.md']:
-        p.write_text(render(str(p.relative_to(ROOT)).replace(slug, 'dashboard', 1), ctx) if False else _fill(p.read_text(), ctx))
-    print(f'dashboard {slug} -> {dest}\nnext: cd {dest} && npm install && DATUM_API_URL=https://datum-api-datumlabs1.vercel.app DATUM_API_KEY=... npm run dev\n      edit datum.config.ts and app/page.tsx; deploy: vercel link --scope datumlabs1 --project {slug}, add the two env vars, push.')
+        p.write_text(_fill(p.read_text(), ctx).replace('"name": "datum-dashboard-template"', f'"name": "{slug}"'))
+    print(f'dashboard {slug} -> {dest}\nnext: cd {dest} && npm install && npm run dev   (sample data; add DATUM_API_KEY=... for the platform)\n      edit datum.config.ts and the pages under app/; rules in docs/DESIGN.md\n      deploy: vercel link --scope datumlabs1 --project {slug}, add the two env vars, push.')
 def _fill(t, ctx):
     for k, v in ctx.items(): t = t.replace('{{' + k + '}}', str(v))
     return t
