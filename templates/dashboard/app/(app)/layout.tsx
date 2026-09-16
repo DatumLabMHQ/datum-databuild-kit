@@ -1,6 +1,9 @@
-// The frame every page shares: shadcn's sidebar layout (dashboard-01 block) with the Datum nav.
+// The frame every page shares: shadcn's sidebar layout (dashboard-01 block) with the Datum nav,
+// the status banner above the content and the provenance footer below it.
 import { AppSidebar } from '@/components/app-sidebar';
+import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { StatusBanner } from '@/components/status-banner';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -11,8 +14,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SiteHeader />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">{children}</div>
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="px-4 lg:px-6 empty:hidden"><StatusBanner /></div>
+              {children}
+            </div>
           </div>
+          <SiteFooter />
         </div>
       </SidebarInset>
     </SidebarProvider>

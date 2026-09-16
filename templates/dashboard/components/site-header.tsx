@@ -15,7 +15,7 @@ export async function SiteHeader() {
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mx-2 h-4 data-vertical:self-auto" />
-        <h1 className="text-base font-medium">{config.title}</h1>
+        <span className="text-base font-medium">{config.title}</span>
         <div className="ml-auto flex items-center gap-2">
           <Badge variant="outline" className={status.cls}><span className="size-1.5 rounded-full bg-current" />{status.label}</Badge>
           <ThemeToggle />
