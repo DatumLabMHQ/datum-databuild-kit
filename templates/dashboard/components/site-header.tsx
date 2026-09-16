@@ -1,0 +1,26 @@
+import { config } from '@/datum.config';
+import { platformStatus } from '@/lib/data';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { ThemeToggle } from '@/components/ThemeToggle';
+
+export async function SiteHeader() {
+  const s = await platformStatus();
+  const status = s.sample ? { label: 'Sample data', cls: 'text-(--brand-blue)' }
+    : s.ok === null ? { label: 'Platform unreachable', cls: 'text-(--red)' }
+    : s.ok ? { label: `Platform healthy · ${s.asOf ?? ''}`, cls: 'text-(--green)' } : { label: 'Platform degraded', cls: 'text-(--yellow)' };
+  return (
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mx-2 h-4 data-vertical:self-auto" />
+        <h1 className="text-base font-medium">{config.title}</h1>
+        <div className="ml-auto flex items-center gap-2">
+          <Badge variant="outline" className={status.cls}><span className="size-1.5 rounded-full bg-current" />{status.label}</Badge>
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+  );
+}
