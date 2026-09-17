@@ -86,8 +86,10 @@ A page is a server component. It calls `loadOverview()` and lays out, in this or
 
 The market page (`app/(app)/markets/[id]`) is the drill-down: a `PageBreadcrumb`, the pair as overlapping
 Avatars, the risk badge and a one-line reading, then a `MarketDetailLayout`: on wide screens two Resizable
-panels with a draggable handle (charts left; utilisation ring, parameters, collateral by health band and
-largest suppliers right), stacked on phones. Parameters and suppliers are shadcn `Item` lists with a
+panels with a draggable handle, stacked on phones. The main panel holds the stats, the charts and then the data
+cards two up (collateral by health band, largest suppliers); the aside holds only the utilisation ring and the
+parameters. That split keeps the two columns ending near each other; a tall aside beside an empty main column
+is the layout smell to avoid, and the smoke test measures it. Parameters and suppliers are shadcn `Item` lists with a
 Phosphor icon, a title, a description and the value. A range control is a `NativeSelect`.
 
 Sections stack with `gap-4 md:gap-6`; content sits in `px-4 lg:px-6`. Grids use container queries

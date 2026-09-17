@@ -109,3 +109,15 @@ test('sections keep their vertical rhythm on every page', async ({ page }) => {
     for (const g of gaps) expect(g, `${path} section gap`).toBeGreaterThanOrEqual(16);
   }
 });
+
+test('the market page columns end near each other', async ({ page }) => {
+  // A tall aside beside an empty main column wastes the page. The aside may not run more than one card
+  // (240px) past the main column, and the main column must be the taller of the two or close to it.
+  await page.goto('/markets/wsteth-usdc');
+  const bottoms = await page.$$eval('[data-slot=resizable-panel]', (panels) => panels.map((p) => {
+    const kids = [...p.querySelectorAll(':scope > div > *')].filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0);
+    return Math.max(...kids.map((e) => (e as HTMLElement).getBoundingClientRect().bottom));
+  }));
+  expect(bottoms.length, 'two panels').toBe(2);
+  expect(bottoms[1] - bottoms[0], 'aside overhang').toBeLessThanOrEqual(240);
+});
