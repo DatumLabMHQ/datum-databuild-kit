@@ -95,3 +95,17 @@ test('the sign-in gate: overview open, markets behind the form, and the form ope
   await page.goto('/methodology');
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
+
+test('sections keep their vertical rhythm on every page', async ({ page }) => {
+  // Every top-level section of a page sits in the layout's column with a 16px gap (24px from md up).
+  // The sign-in gate wrapper once swallowed that gap; this keeps it from happening again.
+  for (const path of ['/', '/markets', '/markets/wsteth-usdc', '/methodology']) {
+    await page.goto(path);
+    const gaps = await page.$$eval('[data-slot=page] > *', (els) => {
+      const rects = els.map((e) => e.getBoundingClientRect()).filter((r) => r.height > 0);
+      return rects.slice(1).map((r, i) => Math.round(r.top - rects[i].bottom));
+    });
+    expect(gaps.length, `${path} has at least two sections`).toBeGreaterThanOrEqual(1);
+    for (const g of gaps) expect(g, `${path} section gap`).toBeGreaterThanOrEqual(16);
+  }
+});
