@@ -121,6 +121,9 @@ Overview, MarketDetail); pages never read raw column names. The mapping lives in
   the chart caption.
 - `resources.comparison`: DefiLlama's figure for the same protocol, read for the reconciliation note under
   the table. Our own count stays the headline.
+- `context` (optional): the name the dashboard's brief, product note and reconciliation rows use in
+  datum-context when it differs from the slug (`rwa-terminal-dashboard` reads `rwa-terminal`). `bin/datum check`
+  looks there, and reads the platform key from `~/.config/datum/.env` when the shell has none.
 
 The platform path is verified against `morpho/markets` (628 listed markets on 2026-09-14): `npm run
 dev:platform` reads the key from `~/.config/datum/.env` and every page renders on live rows. Without

@@ -39,18 +39,30 @@ def check(a):
     """Readiness gate: brief signed, descriptor present, resources exist, platform fresh, reconciliation logged."""
     slug = slugify(a.slug); problems = []
     context, api = need('datum-context'), need('datum-api')
-    b = brief_path(slug)
-    if not b.exists(): problems.append('no brief')
-    elif not BRIEF_SIGNED.search(b.read_text()): problems.append('brief not signed off')
-    if not (context / 'products' / f'{slug}.md').exists(): problems.append('no product descriptor in datum-context/products')
-    log = (context / 'evals' / 'divergence-log.md').read_text() if (context / 'evals' / 'divergence-log.md').exists() else ''
-    if f'| {slug} |' not in log: problems.append('no reconciliation row in evals/divergence-log.md')
     dash = ROOT / slug / 'datum.config.ts'
-    if dash.exists():
+    cfg = dash.read_text() if dash.exists() else ''
+    # A dashboard's brief, product note and reconciliation rows live under its context name, which is the
+    # slug unless datum.config.ts says `context: '<name>'` (rwa-terminal-dashboard -> rwa-terminal).
+    m = re.search(r"\bcontext:\s*'([a-z0-9-]+)'", cfg); name = m.group(1) if m else slug
+    b = brief_path(name)
+    if not b.exists(): problems.append(f'no brief (briefs/{name}.md)')
+    elif not BRIEF_SIGNED.search(b.read_text()): problems.append('brief not signed off')
+    if not (context / 'products' / f'{name}.md').exists(): problems.append(f'no product descriptor (products/{name}.md)')
+    log = (context / 'evals' / 'divergence-log.md').read_text() if (context / 'evals' / 'divergence-log.md').exists() else ''
+    if f'| {name} |' not in log: problems.append('no reconciliation row in evals/divergence-log.md')
+    if cfg:
         reg = (api / 'src' / 'lib' / 'registry.ts').read_text()
-        for prod, name in re.findall(r"product:\s*'([a-z0-9_]+)',\s*name:\s*'([a-z0-9_-]+)'", dash.read_text()):
-            if not re.search(rf"product: '{prod}', name: '{name}'", reg): problems.append(f'resource {prod}/{name} is not in the datum-api registry')
+        for prod, rname in re.findall(r"product:\s*'([a-z0-9_]+)',\s*name:\s*'([a-z0-9_-]+)'", cfg):
+            if not re.search(rf"product: '{prod}', name: '{rname}'", reg): problems.append(f'resource {prod}/{rname} is not in the datum-api registry')
     key = os.environ.get('DATUM_API_KEY')
+    if not key:
+        # The durable key lives in ~/.config/datum/.env; read only the two names this check needs.
+        envf = Path.home() / '.config' / 'datum' / '.env'
+        if envf.exists():
+            for line in envf.read_text().splitlines():
+                k, _, v = line.partition('=')
+                if k.strip() in ('DATUM_API_KEY', 'DATUM_API_URL') and v.strip(): os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+        key = os.environ.get('DATUM_API_KEY')
     if key:
         import json, ssl, urllib.request
         ctx = ssl.create_default_context()
