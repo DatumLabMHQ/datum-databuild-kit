@@ -139,6 +139,22 @@ Vaults, every reserve under Aave Horizon) as a shadcn Collapsible: the label ope
 opens the list, the first `NAV_CHILDREN_MAX` (12) rows show and a last row links to the rest. Every dashboard
 does this for every page that has rows. The kit's own pages (`/kit/charts`) make their own demo rows and read nothing from `lib/data.ts`.
 
+## 5a. The sign-in gate
+
+The overview is open to everyone; every other page asks once for a name, an email and what the reader does
+before it opens. `components/gate.tsx` (kit file) wraps the page in `app/(app)/layout.tsx`: on a gated path the
+page still renders underneath, blurred and inert (so the server and crawlers see the same HTML), and a shadcn
+Dialog with the form sits on top; Escape and outside clicks do nothing until the form is sent, and a "Back to
+the overview" link is the way out. The browser remembers the sign-in (localStorage `datum_gate_unlocked` and a
+cookie), and the header's Sign in button opens the same dialog from a free page. `config.gate` in
+`datum.config.ts` turns it off (`enabled: false`) or widens the free paths (`free: ['/', '/methodology']`).
+
+Leads go to `app/api/gate/route.ts` (kit file). With `BEEHIIV_API_KEY` and `BEEHIIV_PUBLICATION_ID` set on the
+project it subscribes them to the Datum Labs list directly, name and occupation as custom fields and the
+dashboard as `utm_source`; without those it forwards to the website's own gate route (`GATE_FORWARD_URL`,
+default `https://www.datumlab.xyz/api/gate`), so every dashboard feeds the one list with no extra keys. The
+smoke test covers both states of the gate; the other route tests run signed in.
+
 ## 6. Adding what a page needs
 
 - A component: `npx shadcn@latest add <name>` (badge, tabs, tooltip, skeleton, empty, select, dropdown-menu,

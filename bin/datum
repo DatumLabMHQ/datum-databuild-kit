@@ -123,9 +123,9 @@ def _fill(t, ctx):
 # the dashboard's own files.
 KIT_FILES = [
     'app/globals.css', 'app/layout.tsx', 'app/not-found.tsx', 'app/(app)/layout.tsx', 'app/(app)/error.tsx', 'app/(app)/not-found.tsx',
-    'app/(app)/loading.tsx', 'app/(app)/markets/loading.tsx', 'app/(app)/markets/[id]/loading.tsx', 'app/(app)/kit/charts/page.tsx',
+    'app/(app)/loading.tsx', 'app/api/gate/route.ts', 'app/(app)/markets/loading.tsx', 'app/(app)/markets/[id]/loading.tsx', 'app/(app)/kit/charts/page.tsx',
     'components/Providers.tsx', 'components/ThemeToggle.tsx', 'components/app-sidebar.tsx', 'components/asset-avatar.tsx',
-    'components/chart-area-interactive.tsx', 'components/command-menu.tsx', 'components/data-table.tsx', 'components/markets-table.tsx',
+    'components/chart-area-interactive.tsx', 'components/command-menu.tsx', 'components/data-table.tsx', 'components/gate.tsx', 'components/markets-table.tsx',
     'components/market-charts.tsx', 'components/market-detail-layout.tsx', 'components/market-facts.tsx', 'components/methodology-lists.tsx',
     'components/page-breadcrumb.tsx', 'components/page-header.tsx', 'components/section-cards.tsx', 'components/site-footer.tsx',
     'components/site-header.tsx', 'components/status-banner.tsx',

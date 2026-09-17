@@ -16,7 +16,8 @@ and the API/MCP resource rows. Done means the product shows in `/api/v1/products
 `new dashboard` creates a Next.js app from `templates/dashboard`: the reference dashboard. It carries the Datum
 design system (tokens, one aesthetic, shadcn/ui components and charts on Recharts 3), a typed client for
 datum-api (key stays server-side), and three pages that run on labelled sample data until a key is set. Edit
-`datum.config.ts` and the pages under `app/`. The rules live in `docs/DESIGN.md`.
+`datum.config.ts` and the pages under `app/`. The rules live in `docs/DESIGN.md`. Every page but the overview sits behind
+a sign-in gate (name, email, occupation) that feeds the Datum Labs list; see DESIGN.md §5a.
 
 This is the only dashboard kit. The HTML kit (`DL-Dashboard`) and the `datumlabs-sdk` monorepo were archived on
 16 September 2026; pages still on the HTML kit migrate here when next touched.

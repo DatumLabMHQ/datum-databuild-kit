@@ -2,6 +2,10 @@
 // are there. Fails loudly on a broken page, a missing caption, or a server-side render error.
 import { expect, test, type Page } from '@playwright/test';
 
+// Every route except the overview sits behind the sign-in gate. The routes below are checked signed
+// in (the flag the gate stores); the gate itself has its own test at the end.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => localStorage.setItem('datum_gate_unlocked', '1')); });
+
 const ROUTES = [
   { path: '/', h1: /Where does lending activity sit/i, checks: async (p: Page) => {
     await expect(p.locator('[data-slot=card]').first()).toBeVisible();
@@ -68,4 +72,26 @@ test('phone width: no horizontal scroll on the overview', async ({ page }) => {
   await page.goto('/');
   const wider = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(wider).toBe(false);
+});
+
+test('the sign-in gate: overview open, markets behind the form, and the form opens it', async ({ page, context }) => {
+  await context.addInitScript(() => localStorage.removeItem('datum_gate_unlocked'));
+  await page.goto('/');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
+  await page.goto('/markets');
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: /Sign in to open the full dashboard/i })).toBeVisible();
+  await expect(page.locator('main div[inert]')).toHaveCount(1);
+  await expect(dialog.getByRole('link', { name: /Back to the overview/i })).toBeVisible();
+  await page.route('**/api/gate', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+  await dialog.getByLabel('Full name').fill('Ada Lovelace');
+  await dialog.getByLabel('Email').fill('ada@example.com');
+  await dialog.getByLabel('What you do').fill('Analyst');
+  await dialog.getByRole('button', { name: /Open the dashboard/i }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('main div[inert]')).toHaveCount(0);
+  await expect(page.locator('table tbody tr')).toHaveCount(12);
+  await page.goto('/methodology');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 });
