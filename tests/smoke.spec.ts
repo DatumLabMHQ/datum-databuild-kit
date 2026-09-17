@@ -87,7 +87,7 @@ test('the sign-in gate: overview open, markets behind the form, and the form ope
   await page.route('**/api/gate', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
   await dialog.getByLabel('Full name').fill('Ada Lovelace');
   await dialog.getByLabel('Email').fill('ada@example.com');
-  await dialog.getByLabel('What you do').fill('Analyst');
+  await dialog.getByLabel('What you do').selectOption('Analyst');
   await dialog.getByRole('button', { name: /Open the dashboard/i }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('main div[inert]')).toHaveCount(0);
