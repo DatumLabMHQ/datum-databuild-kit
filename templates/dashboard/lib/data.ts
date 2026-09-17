@@ -144,3 +144,8 @@ export const navBadges: FrameData['navBadges'] = async () => {
   const o = await loadOverview();
   return { '/markets': o.markets.length };
 };
+/** Every market under Markets in the sidebar, largest first. */
+export const navChildren: FrameData['navChildren'] = async () => {
+  const o = await loadOverview();
+  return { '/markets': o.markets.map((m) => ({ label: `${m.collateral} / ${m.loan}`, href: `/markets/${m.id}` })) };
+};

@@ -20,9 +20,12 @@ system and there must not be one.
 
 ## 1. The look
 
-Inter everywhere including numbers (tabular figures), sentence case, colour reserved for data rather than
-chrome, light and dark through the tokens. Rounded cards on a warm off-white ground; the sidebar is inset.
-This is the only aesthetic.
+The same faces and palette as datumlab.xyz, so a dashboard and the site are one brand. Geist for text and
+numbers (tabular figures, medium weight for the big numbers, never bold), Source Serif 4 for the one display
+line on a page (the question, `font-heading`), Geist Mono for addresses and code. Sentence case, colour
+reserved for data rather than chrome, light and dark through the tokens. Rounded white cards on the site's
+Platinum ground (`#F5F7FA`, a cool blue-tinted grey; never a warm or brown neutral); dark mode is the brand
+navy, not a grey. The sidebar is inset. This is the only aesthetic.
 
 Icons are **Phosphor only** (`@phosphor-icons/react`, regular weight). `components.json` sets
 `iconLibrary: phosphor`, so `npx shadcn add` writes Phosphor imports into every component. Client
@@ -38,12 +41,13 @@ so shadcn components and charts wear the Datum look with no per-component stylin
 | Group | Tokens |
 |---|---|
 | Surfaces and text | `--bg`, `--bg-2`, `--surface`, `--surface-2`, `--fg`, `--fg-muted`, `--fg-dim`, `--line`, `--line-strong`, `--hover` |
-| Accents, each with a `-soft` background | `--orange` (brand), `--green`, `--red`, `--yellow`; plus `--blue`, `--purple`, `--cyan` |
-| Brand mark | `--brand-blue` (#4A6CF7): the wordmark accent and the sample-data tint, nothing else |
-| Chart series, in order | `--chart-1` to `--chart-8` |
+| Brand ramps, the same in both themes | `--sapphire-50` to `--sapphire-900` (500 is the brandmark blue), `--navy-500/700/900`, `--neutral-0` to `--neutral-950` (the site's scales) |
+| Accents, each with a `-soft` background | `--green`, `--red`, `--yellow` (data states); `--blue`, `--cyan`, `--purple`, `--orange` for series only |
+| Brand mark | `--brand-blue` (sapphire-500, #4A6CF7): the primary, the wordmark accent, the active nav item and the ring |
+| Chart series, in order | `--chart-1` to `--chart-8`: sapphire, light sapphire, cyan, amber, green, navy, red, grey (the site's order, so a supplied/borrowed pair reads as one hue) |
 | Chains, the same in both themes | `--chain-ethereum`, `--chain-base`, `--chain-arbitrum`, `--chain-avalanche`, `--chain-plume`, `--chain-binance`, `--chain-optimism` |
 | Shape and depth | `--radius` (12px), `--shadow-sm`, `--shadow-md`, `--shadow-lg` |
-| Fonts | `--font-sans` (Inter, loaded with next/font), `--font-mono` (JetBrains Mono, addresses and code only) |
+| Fonts | `--font-sans` (Geist), `--font-heading` (Source Serif 4, the page question only), `--font-mono` (Geist Mono, addresses and code only); all loaded with next/font in `app/layout.tsx` |
 
 In markup use the Tailwind names: `bg-card`, `text-muted-foreground`, `border-border`, `fill-chart-1`. A Datum
 token that has no shadcn name is reached as `text-(--brand-blue)` or `bg-(--green)/10`.
@@ -125,11 +129,15 @@ config stays `draft` until `bin/datum check <slug>` prints READY. Loaders are wr
 the layout, the header and the page share one read per request.
 
 The frame (sidebar, header, banner, footer) does not read `loadOverview()`. It reads `lib/platform.ts`, a kit
-file (`platformStatus`, `showKit`), and asks the dashboard's `lib/data.ts` for two things, typed as
-`FrameData` there: `searchItems()` (rows for the cmd+k palette) and `navBadges()` (counts by nav href). A
+file (`platformStatus`, `showKit`), and asks the dashboard's `lib/data.ts` for three things, typed as
+`FrameData` there: `searchItems()` (rows for the cmd+k palette), `navBadges()` (counts by nav href) and
+`navChildren()` (rows under a nav entry). A
 dashboard whose data is not market-shaped keeps its own loaders and shapes (the RWA terminal has
-`lib/rwa.ts` and `lib/rwa-types.ts`) and still exports those two from `lib/data.ts`; nothing in the frame
-changes. The kit's own pages (`/kit/charts`) make their own demo rows and read nothing from `lib/data.ts`.
+`lib/rwa.ts` and `lib/rwa-types.ts`) and still exports those from `lib/data.ts`; nothing in the frame changes.
+`navChildren()` lists a page's rows under it in the sidebar (every market under Markets, every vault under
+Vaults, every reserve under Aave Horizon) as a shadcn Collapsible: the label opens the page, the chevron
+opens the list, the first `NAV_CHILDREN_MAX` (12) rows show and a last row links to the rest. Every dashboard
+does this for every page that has rows. The kit's own pages (`/kit/charts`) make their own demo rows and read nothing from `lib/data.ts`.
 
 ## 6. Adding what a page needs
 
