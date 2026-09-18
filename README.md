@@ -32,4 +32,5 @@ https://aave-dashboard-next.vercel.app) and `centrifuge-rwa-next` (Centrifuge RW
 https://centrifuge-rwa-next.vercel.app). Every page but the overview sits behind the sign-in gate.
 
 CI: `.github/workflows/check.yml` typechecks, lints, builds and smoke-tests the template on every push, and
-generates a dashboard with `bin/datum` to prove the scaffolder still works.
+generates a dashboard with `bin/datum` to prove the scaffolder still works. Every dashboard carries the same
+workflow and the kit's generic smoke test (`tests/smoke.spec.ts`), run on its own pages on every push.

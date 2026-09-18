@@ -193,11 +193,16 @@ files are published as a package.
 
 ## 8. Continuous checks
 
-Every push to the kit runs `.github/workflows/check.yml`: `npm run check` on the template (typecheck, lint,
-build), the Playwright smoke test in `tests/smoke.spec.ts` against the built app on sample data (every route
-renders with no console errors, captions present, the not-found page, a row click, the palette, phone
-width), and a scaffolder job that generates a dashboard with `bin/datum` and typechecks it. Run the smoke
-test locally with `npm run test:smoke` at the kit root against a dev server on 3030.
+The kit's own CI (`.github/workflows/check.yml` at the kit root) typechecks, lints, builds and smoke-tests the
+reference template on every push, and scaffolds a dashboard to prove the generator still works. Every dashboard
+carries the same idea as kit files: `tests/smoke.spec.ts`, `playwright.config.ts` and
+`.github/workflows/check.yml`, run on every push with the repo secret `DATUM_API_KEY` so the build reads the
+platform. The generic test reads the sidebar and, signed in, opens every page and the first row of every
+table, asserting a 200, an h1, no console errors, no number leaks (NaN, undefined, a stray `$-`), sections at
+least 16px apart, detail columns and card rows ending on one line, and a caption on every chart or table card;
+it also checks the gate (overview open, everything else behind the dialog) and phone width. Run it locally with
+`npm run test:smoke` against `npm run dev`. When a layout fault is found by eye, the fix goes into the kit and a
+line into this test, so the next dashboard cannot repeat it.
 
 ## 9. Checklist before a page is shared
 
