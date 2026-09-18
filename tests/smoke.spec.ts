@@ -121,3 +121,14 @@ test('the market page columns end on the same line', async ({ page }) => {
   expect(bottoms.length, 'two panels').toBe(2);
   expect(Math.abs(bottoms[1] - bottoms[0]), 'column bottoms differ').toBeLessThanOrEqual(4);
 });
+
+test('cards that share a row end on the same line', async ({ page }) => {
+  // CardRow: the first card sets the height, the rest fill and scroll inside.
+  await page.goto('/markets/wsteth-usdc');
+  const rows = await page.$$eval('[data-slot=card-row]', (rows) => rows.map((row) => {
+    const cells = [...row.children].map((c) => c.getBoundingClientRect().bottom);
+    return Math.max(...cells) - Math.min(...cells);
+  }));
+  expect(rows.length, 'a card row on the market page').toBeGreaterThanOrEqual(1);
+  for (const spread of rows) expect(spread, 'row bottoms differ').toBeLessThanOrEqual(4);
+});
