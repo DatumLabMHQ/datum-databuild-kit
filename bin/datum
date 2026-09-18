@@ -134,6 +134,7 @@ def _fill(t, ctx):
 # else in a dashboard is its own. `datum sync <slug>` copies these, reports what changed, never touches
 # the dashboard's own files.
 KIT_FILES = [
+    'tests/smoke.spec.ts', 'playwright.config.ts', '.github/workflows/check.yml',
     'app/globals.css', 'app/layout.tsx', 'app/not-found.tsx', 'app/(app)/layout.tsx', 'app/(app)/error.tsx', 'app/(app)/not-found.tsx',
     'app/(app)/loading.tsx', 'app/api/gate/route.ts', 'app/(app)/markets/loading.tsx', 'app/(app)/markets/[id]/loading.tsx', 'app/(app)/kit/charts/page.tsx',
     'components/Providers.tsx', 'components/ThemeToggle.tsx', 'components/app-sidebar.tsx', 'components/asset-avatar.tsx', 'components/card-row.tsx',
