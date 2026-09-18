@@ -88,8 +88,9 @@ The market page (`app/(app)/markets/[id]`) is the drill-down: a `PageBreadcrumb`
 Avatars, the risk badge and a one-line reading, then a `MarketDetailLayout`: on wide screens two Resizable
 panels with a draggable handle, stacked on phones. The main panel holds the stats, the charts and then the data
 cards two up (collateral by health band, largest suppliers); the aside holds only the utilisation ring and the
-parameters. The aside takes the main column's height and its last card scrolls inside, so the two columns end on the
-same line; the smoke test measures it. Cards that share a row go in a `CardRow`: the first card sets the row's
+parameters. The aside takes the main column's height and its last child grows and scrolls inside, so the two columns
+end on the same line; the smoke test measures it. The aside's last child must therefore be a card (a link or
+button goes above the facts, never below them). Cards that share a row go in a `CardRow`: the first card sets the row's
 height and the others fill it and scroll inside (a supplier list beside a health chart). A bare grid stretches
 the short card to the tall one, which is the layout smell to avoid; the smoke test measures that too. Parameters and suppliers are shadcn `Item` lists with a
 Phosphor icon, a title, a description and the value. A range control is a `NativeSelect`.
