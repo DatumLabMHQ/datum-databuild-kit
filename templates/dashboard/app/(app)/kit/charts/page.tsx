@@ -63,7 +63,7 @@ export default async function ChartGuide() {
           <DonutChart items={byProtocol} unit="usd" height={220} centerLabel="supplied" />
         </Guide>
         <Guide title="Scatter chart" use="two measures across many items, to find the outliers: pool size against turnover, risk against return. Use xLog when the x values span orders of magnitude, which dollar amounts usually do. highlight marks our own points among peers." not="one value per category (use a bar), anything over time, or fewer than about eight points, where a table reads better.">
-          <ScatterChart points={efficiency} xLabel="Pool TVL" yLabel="Turnover" yUnit="count" xLog highlight={['GHO / USDC']} height={280} yFormat={(v) => `${Number(v).toFixed(1)}x`} />
+          <ScatterChart points={efficiency} xLabel="Pool TVL" yLabel="Turnover" yUnit="count" xLog highlight={['GHO / USDC']} height={280} />
         </Guide>
         <Guide title="Radar chart" use="a profile across four to eight dimensions on one shared scale: a risk scorecard, one protocol against another." not="values on different scales, time series, more than three series, or anything that needs a precise reading.">
           <RadarChart data={radar} series={[{ key: 'Aave', label: 'Aave' }, { key: 'Morpho', label: 'Morpho' }]} height={260} legend />

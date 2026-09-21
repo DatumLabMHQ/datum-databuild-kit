@@ -27,6 +27,10 @@ This page is the same rules in one place, so a review can point at a line.
 - A range control is a native select (Last 3 months, 30 days, 7 days), filtered against the last day
   in the data, never against today.
 - Animations stay off; revalidated data must not re-animate.
+- **A `format`, `xFormat` or `yFormat` function cannot be passed from a server page.** The charts are
+  client components, so React cannot serialise a function across that boundary. It typechecks and
+  then fails at render with "Functions cannot be passed directly to Client Components". Pick the
+  closest `unit`, or put the chart in a small `'use client'` wrapper that owns the formatter.
 - Prefer a table when people will read exact values or sort them. Prefer Donut, Area and Bar over
   rows of horizontal bars. Never two y axes on one chart, never 3D, never a pie with a legend of ten.
 - A new chart type comes from the shadcn registry (`npx shadcn@latest add chart-<family>-<variant>`),
