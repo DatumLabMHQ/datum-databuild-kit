@@ -165,6 +165,22 @@ platform tables read through datum-api. Both were false, and provenance is the o
 must never be. Use `'dashboard'` as a staging post, not a destination: when the product lands on the
 platform, only the dashboard's own loader file changes.
 
+### Columns a protocol cannot fill
+
+`MarketsTable` takes `hideColumns`, naming the droppable columns this protocol has no value for.
+They are removed, not rendered as n/a.
+
+Not every lending protocol has every field in `Market`. Euler's EVK vaults set a different LTV per
+accepted collateral, so no single LLTV exists for a vault row. Fluid publishes rates per asset
+across venues rather than per vault. Showing those as n/a is worse than not offering the column:
+it reads as missing data rather than as a field that does not apply.
+
+`collateral` is not droppable, since it is the row's identity and carries its link.
+
+The rule this sits under: **when the shape wants a number the source does not have, never print 0.**
+Drop the column if the field does not apply to the protocol at all, and pass `undefined` (which the
+formatters render as n/a) when it applies but is genuinely missing for that row.
+
 ## 5a. The sign-in gate
 
 The overview is open to everyone; every other page asks once for a name, an email and what the reader does
