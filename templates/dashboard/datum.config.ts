@@ -9,6 +9,12 @@ const ph = (v: string, fallback: string) => (v.startsWith('{{') && v.endsWith('}
 export const config = {
   // 'draft' until `datum check <slug>` prints READY and the owner signs the brief; the page says so.
   status: 'draft' as 'draft' | 'live',
+  // Where this dashboard's numbers come from, so the frame's provenance copy tells the truth.
+  //   'platform'  — datum-api, falling back to labelled sample data when no key is set. The default.
+  //   'dashboard' — the dashboard's own loaders, for a product the platform does not carry yet.
+  //                 Real numbers, so the frame must not call them sample, and the footer names the
+  //                 entries in `sources` below instead of claiming datum-api.
+  dataSource: 'platform' as 'platform' | 'dashboard',
   slug: ph('{{slug}}', 'reference-dashboard'),
   title: ph('{{title}}', 'State of lending'),
   description: ph('{{description}}', 'The reference dashboard for Datum Labs: the standard look and structure, running on labelled sample data until a platform key is set.'),

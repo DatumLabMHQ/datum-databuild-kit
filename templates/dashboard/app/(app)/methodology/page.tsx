@@ -15,13 +15,15 @@ export const metadata = { title: 'Methodology' };
 
 export default async function Methodology() {
   const [s, d] = await Promise.all([platformStatus(), loadOverview()]);
-  const platform: StatusRow = s.sample
+  const platform: StatusRow = s.source === 'dashboard'
+    ? { icon: 'platform', label: 'Read by this dashboard', detail: 'This product is not on the Datum data platform yet, so the dashboard reads its own sources directly. They are listed below, and the numbers are live, not sample.', badge: { text: 'own sources', tone: 'ok' } }
+    : s.sample
     ? { icon: 'flask', label: 'Sample data', detail: 'No platform key is set, so every number is generated and labelled. Nothing on this instance is a live figure.', badge: { text: 'sample', tone: 'info' } }
     : s.ok === null ? { icon: 'platform', label: 'Platform unreachable', detail: 'datum-api did not answer; the pages show their last cached render.', badge: { text: 'unreachable', tone: 'bad' } }
     : { icon: 'platform', label: s.ok ? 'Platform healthy' : 'Platform degraded', detail: s.ok ? 'Every source job ran on schedule and every table is fresh.' : 'At least one source is stale or a job failed; the health endpoint lists which. Numbers may lag.', badge: { text: s.ok ? 'healthy' : 'degraded', tone: s.ok ? 'ok' : 'warn' } };
   const status: StatusRow[] = [
     platform,
-    { icon: 'clock', label: 'Last platform build', detail: 'When the modelled tables were last rebuilt from the raw snapshots, in UTC.', badge: { text: s.sample ? d.asOf : (s.asOf ?? 'n/a'), tone: 'neutral' } },
+    { icon: 'clock', label: s.source === 'dashboard' ? 'Data as of' : 'Last platform build', detail: s.source === 'dashboard' ? 'The latest day present in the dashboard’s own data, in UTC.' : 'When the modelled tables were last rebuilt from the raw snapshots, in UTC.', badge: { text: s.source === 'dashboard' ? d.asOf : s.sample ? d.asOf : (s.asOf ?? 'n/a'), tone: 'neutral' } },
     { icon: 'timer', label: 'Snapshot and refresh cadence', detail: 'Sources are snapshotted hourly; these pages revalidate every five minutes, so a number is at most about an hour behind the chain.' },
     { icon: 'pulse', label: 'Trend window', detail: `${config.trend.days} days back from the latest day, sampled ${d.historyGrain} from our own count. Each point is one read of every listed market on that day.`, badge: { text: `${d.history.length} points`, tone: 'neutral' } },
     { icon: 'shield', label: 'Dashboard status', detail: config.status === 'draft' ? 'The brief is not signed off and the reconciliation is not logged, so this dashboard is not embedded or shared yet.' : 'The brief is signed off and the reconciliation is logged.', badge: { text: config.status, tone: config.status === 'live' ? 'ok' : 'warn' } },
