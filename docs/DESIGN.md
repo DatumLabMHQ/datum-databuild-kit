@@ -168,12 +168,24 @@ platform, only the dashboard's own loader file changes.
 ## 5a. The sign-in gate
 
 The overview is open to everyone; every other page asks once for a name, an email and what the reader does
-before it opens. `components/gate.tsx` (kit file) wraps the page in `app/(app)/layout.tsx`: on a gated path the
-page still renders underneath, blurred and inert (so the server and crawlers see the same HTML), and a shadcn
-Dialog with the form sits on top; Escape and outside clicks do nothing until the form is sent, and a "Back to
-the overview" link is the way out. The browser remembers the sign-in (localStorage `datum_gate_unlocked` and a
-cookie), and the header's Sign in button opens the same dialog from a free page. `config.gate` in
-`datum.config.ts` turns it off (`enabled: false`) or widens the free paths (`free: ['/', '/methodology']`).
+before it opens. `components/gate.tsx` (kit file) wraps the page in `app/(app)/layout.tsx`: the page still renders
+underneath, blurred, with a shadcn Dialog carrying the form on top; Escape and outside clicks do nothing until the
+form is sent, and a "Back to the overview" link is the way out. The browser remembers the sign-in in both
+localStorage (`datum_gate_unlocked`) and a cookie (`datum_gate`), written independently so one store refusing does
+not lose the other. `config.gate` in `datum.config.ts` turns it off (`enabled: false`) or widens the free paths
+(`free: ['/', '/methodology']`).
+
+Two rules make it safe, and a kit test holds each one:
+
+- **The server never renders a page blurred or inert.** Whether a reader has signed in is a fact about their
+  browser, so it cannot be baked into HTML that Next prerenders once and serves to everyone. The gate only marks a
+  gated page with `data-gate-scope`; it adds `inert` after the browser has answered. This is what went wrong before:
+  the gate decided while rendering, with the answer still unknown, and every live overview shipped blurred and inert.
+- **The blur is CSS, not React.** `html[data-gate='locked'] [data-gate-scope]` in `globals.css` does the blurring,
+  and a small inline script in `GateProvider` sets `data-gate` from localStorage or the cookie while the browser is
+  still parsing the page. A signed-in reader therefore sees no flash of a blurred page, and a page that never
+  finishes hydrating stays readable rather than trapping the reader behind a dialog that cannot open. Every path
+  through the script and the two stores fails open.
 
 Leads go to `app/api/gate/route.ts` (kit file). With `BEEHIIV_API_KEY` and `BEEHIIV_PUBLICATION_ID` set on the
 project it subscribes them to the Datum Labs list directly, name and occupation as custom fields and the
