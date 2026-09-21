@@ -147,6 +147,24 @@ Vaults, every reserve under Aave Horizon) as a shadcn Collapsible: the label ope
 opens the list, the first `NAV_CHILDREN_MAX` (12) rows show and a last row links to the rest. Every dashboard
 does this for every page that has rows. The kit's own pages (`/kit/charts`) make their own demo rows and read nothing from `lib/data.ts`.
 
+### Where the numbers come from
+
+`dataSource` in `datum.config.ts` says which of two it is, and the frame's provenance copy follows it.
+
+- `'platform'` (the default): datum-api, falling back to `lib/sample.ts` with a Sample data banner when no
+  key is set. Everything above applies.
+- `'dashboard'`: the dashboard's own loaders, for a product the platform does not carry yet. The numbers are
+  real, so the frame must not call them sample. `platformStatus()` returns `source: 'dashboard'`, the header
+  badge reads Live data, the footer names the entries in `config.sources` instead of claiming datum-api, and
+  the methodology page says the dashboard reads its own sources. The as-of belongs to the dashboard's data,
+  which the page already prints in its answer line, so the footer does not stamp a platform build time.
+
+This exists because the frame used to assert datum-api provenance unconditionally. A dashboard on its own
+sources printed "Sample data" over live numbers, and a footer claiming every figure came from curated
+platform tables read through datum-api. Both were false, and provenance is the one thing on these pages that
+must never be. Use `'dashboard'` as a staging post, not a destination: when the product lands on the
+platform, only the dashboard's own loader file changes.
+
 ## 5a. The sign-in gate
 
 The overview is open to everyone; every other page asks once for a name, an email and what the reader does
