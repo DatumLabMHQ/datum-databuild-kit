@@ -81,6 +81,7 @@ test('the sign-in gate: overview open, markets behind the form, and the form ope
   for (const path of ['/', '/markets', '/markets/wsteth-usdc', '/methodology']) {
     const html = await (await context.request.get(path)).text();
     expect(html, `${path} server HTML renders the page open`).not.toMatch(/data-slot="page"[^>]*(inert|blur)/);
+    if (path === '/') expect(html, 'a free path is never marked gated').not.toMatch(/data-gate-scope/);
   }
   await page.goto('/');
   await expect(page.getByRole('dialog')).toHaveCount(0);
