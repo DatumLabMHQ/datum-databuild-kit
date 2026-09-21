@@ -11,6 +11,7 @@ This page is the same rules in one place, so a review can point at a line.
 | `LineChart` | Rates and ratios read as a level: APYs, utilisation, spreads, prices. Up to four series; `dots` when points are sparse. | Volumes and totals; categories. | rows `{ day, ...series }` |
 | `BarChart` | One value per category: by chain, by protocol, by asset. `horizontal` with `labels` for rankings and long names; `stacked` for composition per period when periods are few. | Long time series; more than about twelve categories; shares of one whole. | rows `{ name, ...series }` |
 | `DonutChart` | Shares of one whole at one moment, two to six slices. Hover isolates a slice; the centre shows the total. | More than six slices (rank, group the rest as Other); change over time; two wholes side by side. | `[{ name, value }]` |
+| `ScatterChart` | Two measures across many items, to find the outliers: pool size against turnover, risk against return. `xLog` when the x values span orders of magnitude, which dollar amounts usually do; `highlight` marks our own points among peers. | One value per category (use a bar); anything over time; fewer than about eight points, where a table reads better. | `[{ name, x, y, z? }]` |
 | `RadarChart` | A profile across four to eight dimensions on one shared scale: a risk scorecard, one thing against another. | Different scales; time series; more than three series; precise reading. | rows `{ axis, ...series }` |
 | `RadialChart` | One value against a real maximum: utilisation, a cap x% filled, a target reached. | Several values; totals with no ceiling; trends. | `value`, `max` |
 
@@ -26,6 +27,10 @@ This page is the same rules in one place, so a review can point at a line.
 - A range control is a native select (Last 3 months, 30 days, 7 days), filtered against the last day
   in the data, never against today.
 - Animations stay off; revalidated data must not re-animate.
+- **A `format`, `xFormat` or `yFormat` function cannot be passed from a server page.** The charts are
+  client components, so React cannot serialise a function across that boundary. It typechecks and
+  then fails at render with "Functions cannot be passed directly to Client Components". Pick the
+  closest `unit`, or put the chart in a small `'use client'` wrapper that owns the formatter.
 - Prefer a table when people will read exact values or sort them. Prefer Donut, Area and Bar over
   rows of horizontal bars. Never two y axes on one chart, never 3D, never a pie with a legend of ten.
 - A new chart type comes from the shadcn registry (`npx shadcn@latest add chart-<family>-<variant>`),
