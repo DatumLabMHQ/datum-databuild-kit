@@ -81,7 +81,7 @@ test('the sign-in gate: overview open, markets behind the form, and the form ope
   for (const path of ['/', '/markets', '/markets/wsteth-usdc', '/methodology']) {
     const html = await (await context.request.get(path)).text();
     expect(html, `${path} server HTML renders the page open`).not.toMatch(/data-slot="page"[^>]*(inert|blur)/);
-    if (path === '/') expect(html, 'a free path is never marked gated').not.toMatch(/data-gate-scope/);
+    expect(html, `${path} server HTML carries no gate state`).not.toMatch(/data-gate-scope|data-gate=/);
   }
   await page.goto('/');
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -90,6 +90,8 @@ test('the sign-in gate: overview open, markets behind the form, and the form ope
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('heading', { name: /Sign in to open the full dashboard/i })).toBeVisible();
   await expect(page.locator('main div[inert]')).toHaveCount(1);
+  expect(await page.evaluate(() => document.documentElement.dataset.gate), 'a locked reader on a gated page').toBe('locked');
+  expect(await page.$eval('[data-slot=page]', (e) => getComputedStyle(e).filter), 'the page is blurred while locked').toContain('blur');
   await expect(dialog.getByRole('link', { name: /Back to the overview/i })).toBeVisible();
   await page.route('**/api/gate', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
   await dialog.getByLabel('Full name').fill('Ada Lovelace');
@@ -98,6 +100,7 @@ test('the sign-in gate: overview open, markets behind the form, and the form ope
   await dialog.getByRole('button', { name: /Open the dashboard/i }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('main div[inert]')).toHaveCount(0);
+  expect(await page.$eval('[data-slot=page]', (e) => getComputedStyle(e).filter), 'the blur clears when the form is sent').toBe('none');
   await expect(page.locator('table tbody tr')).toHaveCount(12);
   await page.goto('/methodology');
   await expect(page.getByRole('dialog')).toHaveCount(0);

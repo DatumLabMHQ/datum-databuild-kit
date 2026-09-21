@@ -177,15 +177,17 @@ not lose the other. `config.gate` in `datum.config.ts` turns it off (`enabled: f
 
 Two rules make it safe, and a kit test holds each one:
 
-- **The server never renders a page blurred or inert.** Whether a reader has signed in is a fact about their
-  browser, so it cannot be baked into HTML that Next prerenders once and serves to everyone. The gate only marks a
-  gated page with `data-gate-scope`; it adds `inert` after the browser has answered. This is what went wrong before:
-  the gate decided while rendering, with the answer still unknown, and every live overview shipped blurred and inert.
-- **The blur is CSS, not React.** `html[data-gate='locked'] [data-gate-scope]` in `globals.css` does the blurring,
-  and a small inline script in `GateProvider` sets `data-gate` from localStorage or the cookie while the browser is
-  still parsing the page. A signed-in reader therefore sees no flash of a blurred page, and a page that never
-  finishes hydrating stays readable rather than trapping the reader behind a dialog that cannot open. Every path
-  through the script and the two stores fails open.
+- **Nothing about the gate is decided while rendering.** Whether a reader has signed in is a fact about their
+  browser, and it cannot be baked into HTML that Next prerenders once and serves to everyone. Worse, when Next
+  re-renders a cached page on the server to refresh it, `usePathname()` does not reliably report that page's route,
+  so a render there cannot even tell which page it is looking at. The server therefore emits no gate state at all,
+  and a kit test asserts that for every route.
+- **The blur is CSS, switched by the browser before the first paint.** `html[data-gate='locked'] [data-slot=page]`
+  in `globals.css` does the blurring, and a small inline script in `GateProvider` marks `<html>` open or locked from
+  `location.pathname` and the two stores while the browser is still parsing the page. A signed-in reader sees no
+  flash, an unsigned one sees no unblurred page, a client-side navigation re-judges the page in a layout effect
+  before it is painted, and React adds the dialog and `inert` only once the browser has answered. Every path through
+  the script and the two stores fails open, so a page that never finishes hydrating is readable rather than a trap.
 
 Leads go to `app/api/gate/route.ts` (kit file). With `BEEHIIV_API_KEY` and `BEEHIIV_PUBLICATION_ID` set on the
 project it subscribes them to the Datum Labs list directly, name and occupation as custom fields and the
