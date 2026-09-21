@@ -62,7 +62,11 @@ export function MarketsTable({
   hideColumns?: DroppableColumn[];
 }) {
   const drop = new Set<string>(hideColumns ?? []);
-  const columns = drop.size ? allColumns.filter((c) => !drop.has(String(c.id ?? ''))) : allColumns;
+  // Accessor columns carry `accessorKey`, not `id`, so matching on `id` alone silently drops
+  // nothing and the column renders n/a down its whole length.
+  const keyOf = (c: (typeof allColumns)[number]) =>
+    String(c.id ?? (c as { accessorKey?: string }).accessorKey ?? '');
+  const columns = drop.size ? allColumns.filter((c) => !drop.has(keyOf(c))) : allColumns;
   const numeric = NUMERIC.filter((n) => !drop.has(n));
   return (
     <DataTable<Market> rows={data} columns={columns} title={title} caption={caption} getRowId={(m) => m.id} rowHref={(m) => `/markets/${m.id}`}
