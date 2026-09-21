@@ -76,6 +76,12 @@ test('phone width: no horizontal scroll on the overview', async ({ page }) => {
 
 test('the sign-in gate: overview open, markets behind the form, and the form opens it', async ({ page, context }) => {
   await context.addInitScript(() => localStorage.removeItem('datum_gate_unlocked'));
+  // The server never ships a page blurred or inert: a page that fails to hydrate has to stay readable,
+  // and a prerendered page must never carry one reader's gate state to the next.
+  for (const path of ['/', '/markets', '/markets/wsteth-usdc', '/methodology']) {
+    const html = await (await context.request.get(path)).text();
+    expect(html, `${path} server HTML renders the page open`).not.toMatch(/data-slot="page"[^>]*(inert|blur)/);
+  }
   await page.goto('/');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
