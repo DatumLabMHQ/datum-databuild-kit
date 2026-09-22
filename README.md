@@ -1,5 +1,7 @@
 # datum-databuild-kit
 
+> Part of [Atlas](https://github.com/DatumLabMHQ/atlas), Datum Labs' internal data infrastructure. Start there for how the parts fit together.
+
 The standard way to build data work at Datum. Two commands, one repository.
 
 ```bash
