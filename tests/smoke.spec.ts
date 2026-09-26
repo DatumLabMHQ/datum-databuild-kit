@@ -29,7 +29,7 @@ const ROUTES = [
     await expect(p.locator('[data-slot=item]')).toHaveCount(7);
   } },
   { path: '/kit/charts', h1: /Which chart, when/i, checks: async (p: Page) => {
-    await expect(p.locator('svg.recharts-surface')).toHaveCount(8);
+    await expect(p.locator('svg.recharts-surface')).toHaveCount(9);
   } },
 ];
 

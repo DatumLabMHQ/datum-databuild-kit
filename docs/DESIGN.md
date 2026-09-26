@@ -57,7 +57,9 @@ token that has no shadcn name is reached as `text-(--brand-blue)` or `bg-(--gree
 Every page shares `app/(app)/layout.tsx`, which is the `dashboard-01` frame:
 
 - `AppSidebar`: shadcn Sidebar, inset, collapsing to icons (cmd+b, or the rail). Groups with labels:
-  Pages from `datum.config.ts` with the active route lit and a badge with the market count; a second group
+  pages from `datum.config.ts` with the active route lit and a badge with the market count, under Pages or
+  under the `group` each nav entry names (Venues, Assets, Reference: one heading per kind of page, in the
+  order first named, so a reader sees what sort of thing each link is before opening it); a last group
   with datumlab.xyz, which also carries the chart guide when the kit is shown (sample mode, or
   `NEXT_PUBLIC_SHOW_KIT=true`). Client dashboards on the platform never show kit internals; `/kit/charts`
   returns not-found when hidden. The Datum mark and wordmark in the header, the dashboard title in the

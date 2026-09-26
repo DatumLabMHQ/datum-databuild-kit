@@ -49,6 +49,8 @@ export const config = {
   // The sign-in gate: the overview is open to everyone; every other page asks once for a name, an email
   // and an occupation (kept on that browser). Leads join the Datum Labs list through app/api/gate.
   gate: { enabled: true, free: ['/'] as string[] },
+  // Sidebar pages. Add `group: 'Venues'` (or any label) to sort entries under headings; entries without
+  // one sit under Pages. Groups appear in the order they are first named.
   nav: [
     { href: '/', label: 'Overview' },
     { href: '/markets', label: 'Markets' },
