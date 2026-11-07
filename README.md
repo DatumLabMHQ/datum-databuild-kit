@@ -24,14 +24,14 @@ a sign-in gate (name, email, occupation) that feeds the Datum Labs list; see DES
 This is the only dashboard kit. The HTML kit (`DL-Dashboard`) and the `datumlabs-sdk` monorepo were archived on
 16 September 2026; pages still on the HTML kit migrate here when next touched.
 
-The reference dashboard is live on sample data at https://datum-reference-lake.vercel.app (Datum Labs Vercel account, project `datum-reference`, redeployed on every push to `main`).
-Read `docs/GUIDE.md` before the first one, `docs/DESIGN.md` before the first page and `docs/CHARTS.md` before the first chart. Dashboards built with the kit, all on the Datum Labs Vercel account and draft until their briefs are signed:
-`robinhood-lending` (State of Lending on Robinhood Chain, https://robinhood-lending.vercel.app),
-`rwa-terminal-dashboard` (RWA Terminal, https://rwa-terminal-dashboard.vercel.app), `morpho-terminal-dashboard`
-(Morpho Research Terminal, https://morpho-terminal-dashboard.vercel.app), `sui-lending-dashboard` (State of Lending on
-Sui, https://sui-lending-dashboard-neon.vercel.app), `aave-dashboard-next` (Aave Dashboard,
-https://aave-dashboard-next.vercel.app) and `centrifuge-rwa-next` (Centrifuge RWA Terminal,
-https://centrifuge-rwa-next.vercel.app). Every page but the overview sits behind the sign-in gate.
+The reference dashboard is live on sample data at https://datum-reference.datumlabs.workers.dev (Datum Labs Cloudflare account, Worker `datum-reference`; deploy with `cd templates/dashboard && npm run deploy`).
+Read `docs/GUIDE.md` before the first one, `docs/DESIGN.md` before the first page and `docs/CHARTS.md` before the first chart. Dashboards built with the kit, all on the Datum Labs Cloudflare account (Workers, `https://<slug>.datumlabs.workers.dev`) and draft until their briefs are signed:
+`robinhood-lending` (State of Lending on Robinhood Chain, https://robinhood-lending.datumlabs.workers.dev),
+`rwa-terminal-dashboard` (RWA Terminal, https://rwa-terminal-dashboard.datumlabs.workers.dev), `morpho-terminal-dashboard`
+(Morpho Research Terminal, https://morpho-terminal-dashboard.datumlabs.workers.dev), `sui-lending-dashboard` (State of Lending on
+Sui, https://sui-lending-dashboard.datumlabs.workers.dev), `aave-dashboard-next` (Aave Dashboard,
+https://aave-dashboard-next.datumlabs.workers.dev) and `centrifuge-rwa-next` (Centrifuge RWA Terminal,
+https://centrifuge-rwa-next.datumlabs.workers.dev). Every page but the overview sits behind the sign-in gate.
 
 CI: `.github/workflows/check.yml` typechecks, lints, builds and smoke-tests the template on every push, and
 generates a dashboard with `bin/datum` to prove the scaffolder still works. Every dashboard carries the same
