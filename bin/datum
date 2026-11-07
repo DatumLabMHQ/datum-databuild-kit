@@ -69,7 +69,7 @@ def check(a):
         try:
             import certifi; ctx = ssl.create_default_context(cafile=certifi.where())
         except ImportError: pass
-        req = urllib.request.Request((os.environ.get('DATUM_API_URL') or 'https://datum-api-datumlabs1.vercel.app') + '/api/v1/health', headers={'x-api-key': key})
+        req = urllib.request.Request((os.environ.get('DATUM_API_URL') or 'https://datum-api.datumlabs.workers.dev') + '/api/v1/health', headers={'x-api-key': key})
         try:
             h = json.load(urllib.request.urlopen(req, timeout=30, context=ctx))
             if not h.get('ok'): problems.append('platform health not ok: ' + '; '.join(h.get('problems', [])[:3]))
@@ -121,11 +121,13 @@ def new_dashboard(a):
     dest = ROOT / slug
     if dest.exists() and any(dest.iterdir()): sys.exit(f'{dest} exists and is not empty')
     src = KIT / 'templates' / 'dashboard'
-    shutil.copytree(src, dest, ignore=shutil.ignore_patterns('node_modules', '.next', '.vercel', 'next-env.d.ts', 'tsconfig.tsbuildinfo', '.env*'))
+    shutil.copytree(src, dest, ignore=shutil.ignore_patterns('node_modules', '.next', '.vercel', '.cloudflare', '.vinext', 'dist', 'next-env.d.ts', 'tsconfig.tsbuildinfo', '.env*'))
     ctx = dict(slug=slug, title=title, description=a.description or f'{title}, built on the Datum data platform.', today=dt.date.today().isoformat())
     for p in [dest / 'datum.config.ts', dest / 'package.json', dest / 'package-lock.json', dest / 'README.md']:
         if p.exists(): p.write_text(_fill(p.read_text(), ctx).replace('"name": "datum-dashboard-template"', f'"name": "{slug}"'))
-    print(f'dashboard {slug} -> {dest}\nnext: cd {dest} && npm install && npm run dev   (sample data; add DATUM_API_KEY=... for the platform)\n      edit datum.config.ts and the pages under app/; rules in docs/DESIGN.md\n      deploy: vercel link --scope datumlabs1 --project {slug}, add the two env vars, push.')
+    cf = dest / 'cloudflare.config.ts'  # the template deploys as the reference Worker; each dashboard gets its own name
+    if cf.exists(): cf.write_text(cf.read_text().replace('name: "datum-reference"', f'name: "{slug}"'))
+    print(f'dashboard {slug} -> {dest}\nnext: cd {dest} && npm install && npm run dev   (sample data; add DATUM_API_KEY=... for the platform)\n      edit datum.config.ts and the pages under app/; rules in docs/DESIGN.md\n      deploy: npx cf auth login, npx cf workers secrets update DATUM_API_KEY --worker {slug}, npm run deploy (Cloudflare Workers).')
 def _fill(t, ctx):
     for k, v in ctx.items(): t = t.replace('{{' + k + '}}', str(v))
     return t
@@ -143,7 +145,7 @@ KIT_FILES = [
     'components/page-breadcrumb.tsx', 'components/page-header.tsx', 'components/section-cards.tsx', 'components/site-footer.tsx',
     'components/site-header.tsx', 'components/status-banner.tsx',
     'lib/format.ts', 'lib/types.ts', 'lib/datum.ts', 'lib/platform.ts', 'lib/chains.ts', 'lib/utils.ts', 'hooks/use-mobile.ts',
-    'components.json', 'eslint.config.mjs', 'postcss.config.mjs', 'next.config.ts', 'tsconfig.json',
+    'components.json', 'eslint.config.mjs', 'postcss.config.mjs', 'next.config.ts', 'tsconfig.json', 'vite.config.ts',
 ]
 KIT_DIRS = ['components/ui', 'components/charts', 'public/brand']
 

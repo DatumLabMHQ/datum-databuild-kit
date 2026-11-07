@@ -55,7 +55,7 @@ the UTC day; our own count is the headline and DefiLlama is stored beside it; di
 ## 3. A page: `bin/datum new dashboard <slug>`
 
 Creates a Next.js 15 app from `templates/dashboard`, the reference dashboard and the one design standard
-(see `docs/DESIGN.md`; live at https://datum-reference-lake.vercel.app). You edit `datum.config.ts` (title, the question the overview answers, the resources
+(see `docs/DESIGN.md`; live at https://datum-reference.datumlabs.workers.dev). You edit `datum.config.ts` (title, the question the overview answers, the resources
 the pages read and how their columns map onto the normalised shapes, nav, sources, definitions) and the pages
 under `app/`. `lib/data.ts` turns resources into the shapes pages read; without `DATUM_API_KEY` it returns
 labelled sample data, so the app runs and looks right before a single query is wired. `lib/datum.ts` is the
@@ -63,13 +63,14 @@ platform client; the key stays server-side. `npm run dev:platform` runs the app 
 from `~/.config/datum/.env`; `npm run check` is typecheck, lint and build. The frame, cards, chart and table are shadcn's dashboard-01 block on the Datum tokens; more shadcn
 components and chart types are added with `npx shadcn@latest add <name>` and arrive already themed.
 
-Deploy on the Datum Labs Vercel account:
+Deploy on the Datum Labs Cloudflare account (Workers, via vinext; `cloudflare.config.ts` is the Worker config):
 
 ```bash
 gh repo create DatumLabMHQ/<slug> --public --source .
-vercel link --scope datumlabs1 --project <slug>
-printf '%s' "$DATUM_API_KEY" | vercel env add DATUM_API_KEY production
 git push -u origin main
+npx cf auth login
+npx cf workers secrets update DATUM_API_KEY --worker <slug>   # prompts for the value
+npm run deploy                                                  # live at https://<slug>.datumlabs.workers.dev
 ```
 
 Cron jobs stay off on every dashboard; a dashboard holds no data. Anything on a schedule lives in the

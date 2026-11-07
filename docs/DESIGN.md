@@ -9,8 +9,8 @@ labelled sample data:
 cd templates/dashboard && npm install && npm run dev
 ```
 
-The same build is live at https://datum-reference-lake.vercel.app: the Datum Labs Vercel project `datum-reference`
-is connected to this repository with root directory `templates/dashboard`, so every push to `main` redeploys it.
+The same build is live at https://datum-reference.datumlabs.workers.dev: the Datum Labs Cloudflare Worker `datum-reference`
+is deployed from `templates/dashboard` with `npm run deploy`.
 It runs on sample data with no platform key.
 
 The rule that produced it: build from shadcn, never beside it. The page frame is shadcn's `dashboard-01`
